@@ -1,4 +1,5 @@
 import CoreModule from '../core-module.mjs';
+import { getNodeParents, hasNodeParent } from '../utils.mjs';
 
 export default class ContextMenuCoreModule extends CoreModule {
   /**
@@ -25,6 +26,8 @@ export default class ContextMenuCoreModule extends CoreModule {
     this.items = [];
 
     this.close = this.close.bind(this);
+
+    window.addEventListener('click', this.close);
   }
 
   /**
@@ -33,16 +36,27 @@ export default class ContextMenuCoreModule extends CoreModule {
    * @private
    */
   onElementClick(event) {
-    const index = Array
-      .from(this.element.children)
-      .indexOf(event.target);
-    if (index !== -1) {
-      const item = this.items[index];
-      if (item === undefined || item.label.length === 0) {
-        event.preventDefault();
+    if (event.target instanceof HTMLElement) {
+      if (event.target === this.element) {
+        event.stopPropagation();
         return;
       }
-      item.handler(event);
+      let parent = event.target;
+      while (parent != null) {
+        if (parent.tagName === 'LI') {
+          const index = Array
+            .from(this.element.childNodes)
+            .indexOf(parent);
+          if (index !== -1) {
+            const item = this.items[index];
+            if (item !== undefined && item.label.length !== 0) {
+              item.handler(event);
+              break;
+            }
+          }
+        }
+        parent = parent.parentNode;
+      }
     }
   }
 
@@ -50,7 +64,6 @@ export default class ContextMenuCoreModule extends CoreModule {
     if (this.element.parentElement != null) {
       this.element.parentElement.removeChild(this.element);
     }
-    window.removeEventListener('click', this.close);
   }
 
   /**
@@ -76,7 +89,6 @@ export default class ContextMenuCoreModule extends CoreModule {
     this.element.textContent = '';
 
     window.document.body.appendChild(this.element);
-    window.addEventListener('click', this.close);
 
     for (const item of items) {
       if (item.label.length === 0) {

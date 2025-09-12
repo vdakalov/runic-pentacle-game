@@ -6,7 +6,7 @@ import { createEnum } from '../../utils.mjs';
  * @enum {string}
  * @readonly
  */
-export const BoardCellKind = createEnum({
+export const BoardWaypointKind = createEnum({
   /**
    * Track cells for first game stage
    */
@@ -30,19 +30,37 @@ export default class BoardCoreModule extends CoreModule {
     super(core);
 
     /**
-     * @typedef {Object} BoardCell
+     * @typedef {Object} BoardWaypoint
      * @property {number} top
      * @property {number} left
-     * @property {BoardCellKind} kind
+     * @property {BoardWaypointKind} kind
      */
     /**
      *
-     * @type {BoardCell[]}
+     * @type {BoardWaypoint[]}
      */
-    this.cells = [];
+    this.waypoints = [];
   }
 
   destroy() {
 
+  }
+
+  /**
+   *
+   * @param {BoardWaypointKind} kind
+   * @param {number} left
+   * @param {number} top
+   */
+  createWaypoint(kind, left, top) {
+    /**
+     *
+     * @type {BoardWaypoint}
+     */
+    const wp = {
+      kind, left, top
+    };
+    this.waypoints.push(wp);
+    return wp;
   }
 }

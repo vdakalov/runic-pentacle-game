@@ -16,7 +16,7 @@ export default class ImageBoardCoreModule extends CoreModule {
 
     this.core
       .get(RafCoreModule)
-      .set(this.draw = this.draw.bind(this));
+      .set(this.draw = this.draw.bind(this), 0);
 
     /**
      *

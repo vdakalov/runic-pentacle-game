@@ -60,20 +60,20 @@ export default class Application {
         x >= l && r > x && y >= t && b > y);
     const items = [
       { label: 'Create Track cell',
-        handler: this._onCreateCell.bind(this, BoardCellKind.Track, event) },
+        handler: this._onCreateCell.bind(this, BoardWaypointKind.Track, event) },
       { label: 'Create Nature cell',
-        handler: this._onCreateCell.bind(this, BoardCellKind.Nature, event) },
+        handler: this._onCreateCell.bind(this, BoardWaypointKind.Nature, event) },
       { label: 'Create Line cell',
-        handler: this._onCreateCell.bind(this, BoardCellKind.Line, event) },
+        handler: this._onCreateCell.bind(this, BoardWaypointKind.Line, event) },
       { label: 'Create Event cell',
-        handler: this._onCreateCell.bind(this, BoardCellKind.Event, event) }
+        handler: this._onCreateCell.bind(this, BoardWaypointKind.Event, event) }
     ];
 
     if (cacheIndex !== -1) {
       const cache = this.boardCellsCache[cacheIndex];
       const index = this.board.cells.indexOf(cache.cell);
       items.unshift({
-        label: `Delete ${BoardCellKind[cache.cell.kind]}#${index} cell`,
+        label: `Delete ${BoardWaypointKind[cache.cell.kind]}#${index} cell`,
         handler: this._onDeleteCell.bind(this, cacheIndex, index)
       });
       if (this.connect == null) {
@@ -94,7 +94,7 @@ export default class Application {
 
   /**
    *
-   * @param {BoardCellKind} kind
+   * @param {BoardWaypointKind} kind
    * @param {MouseEvent} event
    * @private
    */
@@ -103,7 +103,7 @@ export default class Application {
     const y = event.offsetY;
     /**
      *
-     * @type {BoardCell}
+     * @type {BoardWaypoint}
      */
     const cell = {
       kind,
@@ -137,10 +137,10 @@ export default class Application {
       this.boardCellsCache.push({ cell, rect });
       this.c.beginPath();
       switch (cell.kind) {
-        case BoardCellKind.Track: this.c.fillStyle = 'red'; break;
-        case BoardCellKind.Nature: this.c.fillStyle = 'green'; break;
-        case BoardCellKind.Line: this.c.fillStyle = 'blue'; break;
-        case BoardCellKind.Event: this.c.fillStyle = 'orange'; break;
+        case BoardWaypointKind.Track: this.c.fillStyle = 'red'; break;
+        case BoardWaypointKind.Nature: this.c.fillStyle = 'green'; break;
+        case BoardWaypointKind.Line: this.c.fillStyle = 'blue'; break;
+        case BoardWaypointKind.Event: this.c.fillStyle = 'orange'; break;
       }
       this.c.fillRect(x, y, rect.width, rect.height);
       this.c.closePath();

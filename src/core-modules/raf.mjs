@@ -55,9 +55,10 @@ export default class RafCoreModule extends CoreModule {
   /**
    *
    * @param {RafTickHandler} handler
+   * @param {number} [priority]
    */
-  set(handler) {
-    this.handlers.push(handler);
+  set(handler, priority = this.handlers.length) {
+    this.handlers.splice(priority, 0, handler);
   }
 
   /**
