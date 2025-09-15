@@ -5,6 +5,7 @@ import ResizeCanvasCoreModule from './core-modules/canvas/resize.mjs';
 import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
 import ContextMenuCoreModule from './core-modules/context-menu.mjs';
 import MenuSceneCoreModule from './core-modules/scenes/menu.mjs';
+import StorageCoreModule from './core-modules/storage.mjs';
 
 export default class Application {
   constructor() {
@@ -15,6 +16,9 @@ export default class Application {
      * @private
      */
     this.core = new Core([
+      // storage
+      StorageCoreModule,
+
       // raf modules
       RafCoreModule,
 

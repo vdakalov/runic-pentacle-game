@@ -33,6 +33,13 @@ export default class SceneCoreModule extends CoreModule {
       this.onClick = this.onClick.bind(this));
 
     this.raf.set(this.draw = this.draw.bind(this));
+
+    /**
+     *
+     * @type {number}
+     * @readonly
+     */
+    this.TAU = Math.PI * 2;
   }
 
   destroy() {
