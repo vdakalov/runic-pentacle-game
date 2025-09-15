@@ -23,6 +23,7 @@ canvas {
   min-width: 4em;
   white-space: nowrap;
   cursor: pointer;
+  font-family: sans-serif;
 }
 
 .ContextMenuCoreModule > hr {

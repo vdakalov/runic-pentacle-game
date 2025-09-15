@@ -2,6 +2,15 @@ import CoreModule from '../core-module.mjs';
 import { getNodeParents, hasNodeParent } from '../utils.mjs';
 
 export default class ContextMenuCoreModule extends CoreModule {
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  get opened() {
+    return this.element.parentElement != null;
+  }
+
   /**
    *
    * @param {Core} core
@@ -37,7 +46,7 @@ export default class ContextMenuCoreModule extends CoreModule {
    */
   onElementClick(event) {
     if (event.target instanceof HTMLElement) {
-      if (event.target === this.element) {
+      if (event.target === this.element || event.target.tagName === 'HR') {
         event.stopPropagation();
         return;
       }
@@ -49,10 +58,10 @@ export default class ContextMenuCoreModule extends CoreModule {
             .indexOf(parent);
           if (index !== -1) {
             const item = this.items[index];
-            if (item !== undefined && item.label.length !== 0) {
+            if (item !== undefined && item.label !== undefined && item.handler !== undefined) {
               item.handler(event);
-              break;
             }
+            break;
           }
         }
         parent = parent.parentNode;
@@ -69,11 +78,17 @@ export default class ContextMenuCoreModule extends CoreModule {
   /**
    * @typedef {Function} ContextMenuItemHandler
    * @param {MouseEvent} event
+   * @returns {boolean|void} false - do not close menu
+   */
+  /**
+   * @typedef {Function} ContextMenuItemActivator
+   * @returns {boolean} Should then menu item be shown
    */
   /**
    * @typedef {Object} ContextMenuItem
-   * @property {string} label
-   * @property {ContextMenuItemHandler} handler
+   * @property {string} [label]
+   * @property {ContextMenuItemActivator|boolean} [active=true]
+   * @property {ContextMenuItemHandler} [handler]
    */
   /**
    *
@@ -82,7 +97,7 @@ export default class ContextMenuCoreModule extends CoreModule {
    * @param {ContextMenuItem[]} items
    */
   open(left, top, items) {
-    this.items = items;
+    this.items = items.slice(0, items.length);
 
     this.element.style.left = `${left}px`;
     this.element.style.top = `${top}px`;
@@ -90,8 +105,15 @@ export default class ContextMenuCoreModule extends CoreModule {
 
     window.document.body.appendChild(this.element);
 
-    for (const item of items) {
-      if (item.label.length === 0) {
+    for (let index = 0; index < this.items.length; index++) {
+      const item = this.items[index];
+      const inactive = (typeof item.active === 'boolean' && !item.active)
+        || (typeof item.active === 'function' && !item.active());
+      if (inactive) {
+        this.items.splice(index--, 1);
+        continue;
+      }
+      if (item.label === undefined) {
         this.element.appendChild(window.document.createElement('hr'));
         continue;
       }

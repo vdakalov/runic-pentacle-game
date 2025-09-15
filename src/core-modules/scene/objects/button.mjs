@@ -24,6 +24,7 @@ export default class ButtonSceneObject extends LabelSceneObject {
     c.lineWidth = 2;
     c.moveTo(this.rect.left, this.rect.bottom + 2);
     c.lineTo(this.rect.right, this.rect.bottom + 2);
+    c.strokeStyle = this.color;
     c.stroke();
     c.closePath();
   }

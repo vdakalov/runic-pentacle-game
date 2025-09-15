@@ -1,6 +1,5 @@
-import { BoardWaypointKind } from '../../board/index.mjs';
-
-
+import { BoardWaypointSegment } from '../../board/waypoint.mjs';
+import { DOMRectInclude } from '../../../utils.mjs';
 
 export default class EditorWaypoint {
 
@@ -14,23 +13,47 @@ export default class EditorWaypoint {
    * @type {Object.<string, EditorWaypointStyle>}
    */
   static styles = {
-    [BoardWaypointKind.Track]: {
+    [BoardWaypointSegment.RingOuter]: {
       size: 16,
-      color: 'gray'
+      color: '#314026'
     },
-    [BoardWaypointKind.Nature]: {
+    [BoardWaypointSegment.RingMiddle]: {
       size: 16,
-      color: 'blue'
+      color: '#739559'
     },
-    [BoardWaypointKind.Line]: {
+    [BoardWaypointSegment.RingInner]: {
       size: 16,
-      color: 'green'
+      color: '#b5ea8c'
     },
-    [BoardWaypointKind.Event]: {
+    [BoardWaypointSegment.Element]: {
       size: 16,
-      color: 'red'
+      color: '#1684c9'
+    },
+    [BoardWaypointSegment.Line]: {
+      size: 16,
+      color: '#8bc2e4'
+    },
+    [BoardWaypointSegment.Event]: {
+      size: 16,
+      color: '#fb3f1e'
     }
   };
+
+  /**
+   *
+   * @returns {BoardWaypointSegment}
+   */
+  get segment() {
+    return this.bwp.segment;
+  }
+
+  /**
+   *
+   * @param {BoardWaypointSegment} value
+   */
+  set segment(value) {
+    this.bwp.segment = value;
+  }
 
   /**
    *
@@ -43,6 +66,33 @@ export default class EditorWaypoint {
      * @readonly
      */
     this.bwp = bwp;
+
+    /**
+     * Rectangle bounds waypoint in canvas absolute coordinates (px)
+     * @type {DOMRect}
+     * @readonly
+     */
+    this.rect = new DOMRect();
+
+    /**
+     * Is pointer included in the waypoint rect
+     * @type {boolean}
+     */
+    this.hover = false;
+
+    /**
+     *
+     * @type {EditorWaypointsConnection[]}
+     */
+    this.connections = [];
+  }
+
+  /**
+   *
+   * @param {MouseEvent} event
+   */
+  include(event) {
+    return DOMRectInclude(this.rect, event.offsetX, event.offsetY);
   }
 
   /**
@@ -51,13 +101,22 @@ export default class EditorWaypoint {
    * @param {ImageBoardCoreModule} image
    */
   draw(c, image) {
-    const [x, y] = image.r2a(this.bwp.left, this.bwp.top);
-    const { size, color } = this.wps[waypoint.kind];
-    const rect = new DOMRectReadOnly(x - (size / 2), y - (size / 2), size, size);
-    this._waypoints.push({ waypoint, rect });
-    this.canvas.c.beginPath();
-    this.canvas.c.fillStyle = color;
-    this.canvas.c.fillRect(rect.x, rect.y, rect.width, rect.height);
-    this.canvas.c.closePath();
+    const [cx, cy] = image.r2a(this.bwp.rx, this.bwp.ry);
+    const { size, color } = EditorWaypoint.styles[this.bwp.segment];
+    const x = this.rect.x = cx - (size / 2);
+    const y = this.rect.y = cy - (size / 2);
+    const w = this.rect.width = size;
+    const h = this.rect.height = size;
+    c.beginPath();
+    c.fillStyle = color;
+    c.fillRect(x, y, w, h);
+    c.closePath();
+
+    if (this.hover) {
+      c.beginPath();
+      c.strokeStyle = color;
+      c.strokeRect(x - 2, y - 2, w + 4, h + 4);
+      c.closePath();
+    }
   }
 }

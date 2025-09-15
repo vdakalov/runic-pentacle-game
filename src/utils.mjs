@@ -1,3 +1,11 @@
+export const Cursor = {
+  Default: '',
+  CrossHair: 'crosshair',
+  Pointer: 'pointer',
+  Copy: 'copy',
+  Move: 'move',
+};
+
 /**
  * @template T
  * @param {T} obj
