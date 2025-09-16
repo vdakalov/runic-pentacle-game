@@ -30,6 +30,11 @@ canvas {
   margin: 0.2em 0.5em;
 }
 
-.ContextMenuCoreModule > li:hover {
+.ContextMenuCoreModule > li:not(.disabled):hover {
   background-color: #ededed;
+}
+
+.ContextMenuCoreModule > li.disabled {
+  cursor: default;
+  color: #808080;
 }

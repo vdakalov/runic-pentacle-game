@@ -1,5 +1,6 @@
 import EditorMode from '../mode.mjs';
 import { Cursor } from '../../../../utils.mjs';
+import { EditorTheme } from '../../../../theme.mjs';
 
 export default class ConnectionsMode extends EditorMode {
   /**
@@ -26,6 +27,12 @@ export default class ConnectionsMode extends EditorMode {
      * @private
      */
     this._hover = undefined;
+    /**
+     *
+     * @type {boolean}
+     * @private
+     */
+    this._directed = false;
   }
 
   /**
@@ -40,8 +47,8 @@ export default class ConnectionsMode extends EditorMode {
       c.beginPath();
       c.moveTo(fx, fy);
       c.lineTo(bpe.cx, bpe.cy);
-      c.lineWidth = 2;
-      c.strokeStyle = '#fb8b24';
+      c.lineWidth = EditorTheme.Connection.Style.Undone.LineWidth;
+      c.strokeStyle = EditorTheme.Connection.Style.Undone.Color;
       c.stroke();
       c.closePath();
     }
@@ -55,16 +62,23 @@ export default class ConnectionsMode extends EditorMode {
    */
   createContextMenu(bpe, ewp) {
     if (this._connectionActive !== undefined) {
+      const ewc = this._connectionActive;
       return [
-        { label: 'Reverse', handler: this.reverseActiveConnection.bind(this, bpe) },
-        { label: 'Delete', handler: this.deleteActiveConnection.bind(this, bpe) },
+        { label: ewc.directed ? 'Directed' : 'Non-directed',
+          handler: this.toggleDirected.bind(this, bpe, ewc) },
+        { label: 'Reverse', active: ewc.directed,
+          handler: this.reverseActiveConnection.bind(this, bpe) },
         { label: 'Next', active: ewp !== undefined && ewp.connections.length > 1,
           handler: this.activateNextConnection.bind(this, bpe, ewp, this._connectionActive) },
+        { label: 'Delete', handler: this.deleteActiveConnection.bind(this, bpe) },
         { label: 'Cancel', handler: this.deactivateConnection.bind(this, bpe) },
       ];
     }
     if (ewp === undefined) {
-      return [];
+      return [
+        { label: this._directed ? 'Def. Directed' : 'Def. Non-directed',
+          handler: this.toggleDirected.bind(this, bpe, undefined) }
+      ];
     }
     return ewp.connections.map((conn, i) => ({
       label: `Connection ${this.editor.connections.indexOf(conn) + 1}`,
@@ -112,7 +126,8 @@ export default class ConnectionsMode extends EditorMode {
       const ewp = this.editor.waypoints
         .find(wp => wp.include(bpe.origin));
       if (ewp !== undefined && ewp !== this._connectionUndone[0]) {
-        this.editor.createWaypointsConnection(this._connectionUndone[0], ewp);
+        this.editor.createWaypointsConnection(this._connectionUndone[0], ewp, this._directed);
+        this.editor.save();
       }
       this._connectionUndone = undefined;
     }
@@ -179,7 +194,24 @@ export default class ConnectionsMode extends EditorMode {
   deleteActiveConnection(bpe, event) {
     if (this._connectionActive !== undefined) {
       this.editor.deleteWaypointsConnection(this._connectionActive);
+      this.editor.save();
       this.deactivateConnection(bpe, event);
+    }
+    event.stopPropagation();
+    this.editor.onCanvasContextMenu(bpe.origin);
+  }
+
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   * @param {EditorWaypointsConnection|undefined} ewc
+   * @param {MouseEvent} event
+   */
+  toggleDirected(bpe, ewc, event) {
+    if (ewc === undefined) {
+      this._directed = !this._directed;
+    } else {
+      ewc.directed = !ewc.directed;
     }
     event.stopPropagation();
     this.editor.onCanvasContextMenu(bpe.origin);
@@ -193,6 +225,7 @@ export default class ConnectionsMode extends EditorMode {
   reverseActiveConnection(bpe, event) {
     if (this._connectionActive !== undefined) {
       this._connectionActive.reverse();
+      this.editor.save();
       if (event !== undefined && bpe !== undefined) {
         event.stopPropagation();
         this.editor.onCanvasContextMenu(bpe.origin);

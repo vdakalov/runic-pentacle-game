@@ -1,5 +1,6 @@
 import { BoardWaypointSegment } from '../../board/waypoint.mjs';
 import { DOMRectInclude } from '../../../utils.mjs';
+import { EditorTheme } from '../../../theme.mjs';
 
 export default class EditorWaypoint {
 
@@ -13,30 +14,16 @@ export default class EditorWaypoint {
    * @type {Object.<string, EditorWaypointStyle>}
    */
   static styles = {
-    [BoardWaypointSegment.RingOuter]: {
-      size: 16,
-      color: '#314026'
-    },
-    [BoardWaypointSegment.RingMiddle]: {
-      size: 16,
-      color: '#739559'
-    },
-    [BoardWaypointSegment.RingInner]: {
-      size: 16,
-      color: '#b5ea8c'
-    },
-    [BoardWaypointSegment.Element]: {
-      size: 16,
-      color: '#1684c9'
-    },
-    [BoardWaypointSegment.Line]: {
-      size: 16,
-      color: '#8bc2e4'
-    },
-    [BoardWaypointSegment.Event]: {
-      size: 16,
-      color: '#fb3f1e'
-    }
+    [BoardWaypointSegment.RingOuter]: EditorTheme.Waypoint.SegmentStyle.RingOuter,
+    [BoardWaypointSegment.RingMiddle]: EditorTheme.Waypoint.SegmentStyle.RingMiddle,
+    [BoardWaypointSegment.RingInner]: EditorTheme.Waypoint.SegmentStyle.RingInner,
+    [BoardWaypointSegment.Element]: EditorTheme.Waypoint.SegmentStyle.Element,
+    [BoardWaypointSegment.LineVLeft]: EditorTheme.Waypoint.SegmentStyle.Line,
+    [BoardWaypointSegment.LineVRight]: EditorTheme.Waypoint.SegmentStyle.Line,
+    [BoardWaypointSegment.LineHTop]: EditorTheme.Waypoint.SegmentStyle.Line,
+    [BoardWaypointSegment.LineHLeft]: EditorTheme.Waypoint.SegmentStyle.Line,
+    [BoardWaypointSegment.LineHRight]: EditorTheme.Waypoint.SegmentStyle.Line,
+    [BoardWaypointSegment.Event]: EditorTheme.Waypoint.SegmentStyle.Event
   };
 
   /**
@@ -109,7 +96,7 @@ export default class EditorWaypoint {
   draw(c, image) {
     const [cx, cy] = image.r2a(this.bwp.rx, this.bwp.ry);
     const { size, color } = EditorWaypoint.styles[this.bwp.segment];
-    const updatedSize = this.hover ? size + 2 : size;
+    const updatedSize = this.hover ? size * EditorTheme.Waypoint.ResizeOnHover : size;
     const x = this.rect.x = cx - (updatedSize / 2);
     const y = this.rect.y = cy - (updatedSize / 2);
     const w = this.rect.width = updatedSize;
@@ -120,10 +107,11 @@ export default class EditorWaypoint {
     c.closePath();
 
     if (this.selected) {
+      const { LineWidth, Margin } = EditorTheme.Waypoint.SelectionFrame;
       c.beginPath();
       c.strokeStyle = color;
-      c.lineWidth = 1;
-      c.strokeRect(x - 2, y - 2, w + 4, h + 4);
+      c.lineWidth = LineWidth;
+      c.strokeRect(x - Margin, y - Margin, w + Margin * 2, h + Margin * 2);
       c.closePath();
     }
   }

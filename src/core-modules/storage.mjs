@@ -16,14 +16,16 @@ export default class StorageCoreModule extends CoreModule {
    *
    * @param {Object} obj
    * @param {string} key
+   * @param {*} [init]
    * @return {*}
    */
-  get(obj, key) {
+  get(obj, key, init) {
     if (this._data.hasOwnProperty(obj.constructor.name)) {
       if (this._data[obj.constructor.name].hasOwnProperty(key)) {
         return this._data[obj.constructor.name][key];
       }
     }
+    return init;
   }
 
   /**

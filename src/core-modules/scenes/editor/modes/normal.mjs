@@ -8,4 +8,11 @@ export default class NormalMode extends EditorMode {
   constructor(editor) {
     super(editor);
   }
+
+  createContextMenu(bpe, ewp) {
+    return [
+      { label: 'Load', handler: () => this.editor.load() },
+      { label: 'Save', handler: () => this.editor.save() }
+    ];
+  }
 }

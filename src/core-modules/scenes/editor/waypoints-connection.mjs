@@ -1,6 +1,24 @@
 import { getPointBetween } from '../../../utils.mjs';
+import { EditorTheme } from '../../../theme.mjs';
 
 export default class EditorWaypointsConnection {
+
+  /**
+   *
+   * @return {boolean}
+   */
+  get directed() {
+    return this.bwc.directed;
+  }
+
+  /**
+   *
+   * @param {boolean} value
+   */
+  set directed(value) {
+    this.bwc.directed = value;
+  }
+
   /**
    *
    * @param {EditorWaypoint} from
@@ -11,13 +29,11 @@ export default class EditorWaypointsConnection {
     /**
      *
      * @type {EditorWaypoint}
-     * @readonly
      */
     this.from = from;
     /**
      *
      * @type {EditorWaypoint}
-     * @readonly
      */
     this.to = to;
     /**
@@ -50,33 +66,40 @@ export default class EditorWaypointsConnection {
   draw(c, image) {
     const [fcx, fcy] = image.r2a(this.from.bwp.rx, this.from.bwp.ry);
     const [tcx, tcy] = image.r2a(this.to.bwp.rx, this.to.bwp.ry);
+
+    const { Color, LineWidth } = this.active
+      ? EditorTheme.Connection.Style.Selected
+      : EditorTheme.Connection.Style.Default;
     c.beginPath();
     c.moveTo(fcx, fcy);
     c.lineTo(tcx, tcy);
-    c.strokeStyle = this.active ? '#9a031e' : '#e36414';
-    c.lineWidth = this.active ? 4 : 2;
+    c.strokeStyle = Color;
+    c.lineWidth = LineWidth;
     c.stroke();
     c.closePath();
 
     // draw middle symbol
-    const [rx, ry, a] = getPointBetween(fcx, fcy, tcx, tcy, 0.5);
-
-    c.save();
-    c.translate(fcx - rx, fcy - ry);
-    c.rotate(a);
-    c.fillStyle = c.strokeStyle;
-    c.beginPath();
-    c.moveTo(-6, 0);
-    c.lineTo(6, -6);
-    c.lineTo(6, 6);
-    c.fill();
-    c.closePath();
-    c.restore();
+    if (this.directed) {
+      const size = EditorTheme.Connection.DirectionMarkerStyle.Size;
+      const [rx, ry, a] = getPointBetween(fcx, fcy, tcx, tcy, 0.5);
+      c.save();
+      c.translate(fcx - rx, fcy - ry);
+      c.rotate(a);
+      c.fillStyle = c.strokeStyle;
+      c.beginPath();
+      c.moveTo(-size, 0);
+      c.lineTo(size, -size);
+      c.lineTo(size, size);
+      c.fill();
+      c.closePath();
+      c.restore();
+    }
   }
 
   reverse() {
     const temp = this.from;
     this.from = this.to;
     this.to = temp;
+    this.bwc.reverse();
   }
 }

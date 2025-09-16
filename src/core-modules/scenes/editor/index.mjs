@@ -8,9 +8,11 @@ import StorageCoreModule from '../../storage.mjs';
 import NormalMode from './modes/normal.mjs';
 import WayPointsMode from './modes/waypoints.mjs';
 import ConnectionsMode from './modes/connections.mjs';
+import SettingsMode from './modes/settings.mjs';
 import EditorWaypoint from './waypoint.mjs';
 import EditorWaypointsConnection from './waypoints-connection.mjs';
-import { getPointBetween } from '../../../utils.mjs';
+import { EditorTheme } from '../../../theme.mjs';
+import { BoardWaypointSegment } from '../../board/waypoint.mjs';
 
 export default class EditorScene extends SceneCoreModule {
 
@@ -39,6 +41,7 @@ export default class EditorScene extends SceneCoreModule {
       new NormalMode(this),
       new WayPointsMode(this),
       new ConnectionsMode(this),
+      new SettingsMode(this),
     ];
     /**
      *
@@ -46,6 +49,13 @@ export default class EditorScene extends SceneCoreModule {
      * @private
      */
     this._mode = this._modes[0];
+
+    /**
+     *
+     * @type {boolean}
+     * @private
+     */
+    this._modeSelection = false;
 
     this.core.load(
       BoardCoreModule,
@@ -90,6 +100,8 @@ export default class EditorScene extends SceneCoreModule {
     this.pointer.onPointerTranslate.push(this.onPointerTranslate = this.onPointerTranslate.bind(this));
 
     this.canvas.clear();
+
+    this.load();
   }
 
   destroy() {
@@ -105,6 +117,26 @@ export default class EditorScene extends SceneCoreModule {
       PointerBoardCoreModule,
     );
     super.destroy();
+  }
+
+  load() {
+    this.storage.restore();
+    this.board.load();
+
+    this.waypoints = this.board.waypoints
+      .map(bwp => new EditorWaypoint(bwp));
+
+    this.connections = this.board.connections
+      .map(bwc => {
+        const fi = this.board.waypoints.indexOf(bwc.from);
+        const ti = this.board.waypoints.indexOf(bwc.to);
+        return new EditorWaypointsConnection(this.waypoints[fi], this.waypoints[ti], bwc);
+      });
+  }
+
+  save() {
+    this.board.save();
+    this.storage.dump();
   }
 
   /**
@@ -125,22 +157,43 @@ export default class EditorScene extends SceneCoreModule {
     items.push(
       { active: items.length !== 0 },
       { label: `Mode: ${this._mode.constructor.name }`,
-        handler: this.nextMode.bind(this, event) },
-      { label: 'Close Editor',
-        handler: this.close.bind(this) });
+        active: !this._modeSelection,
+        handler: e => {
+          this._modeSelection = true;
+          e.stopPropagation();
+          this.onCanvasContextMenu(event);
+        }
+      },
+      ...this._modes.map(mode => ({
+        label: mode.constructor.name,
+        active: this._modeSelection,
+        disabled: mode === this._mode,
+        handler: this.selectMode.bind(this, mode, event)
+      })),
+      { label: 'Cancel', active: this._modeSelection,
+        handler: e => {
+          this._modeSelection = false;
+          e.stopPropagation();
+          this.onCanvasContextMenu(event);
+        }
+      },
+      { active: this._modeSelection }
+    );
+
+    items.push({ label: 'Close Editor', handler: this.close.bind(this) });
     this.cm.openAtMouseEvent(event, items);
   }
 
   /**
    *
+   * @param {EditorMode} mode
    * @param {MouseEvent} origin
    * @param {MouseEvent} event
    */
-  nextMode(origin, event) {
+  selectMode(mode, origin, event) {
+    this._mode = mode;
+    this._modeSelection = false;
     event.stopPropagation();
-    const index = this._modes.indexOf(this._mode);
-    const next = (index + 1) % this._modes.length;
-    this._mode = this._modes[next];
     this.onCanvasContextMenu(origin);
   }
 
@@ -186,21 +239,6 @@ export default class EditorScene extends SceneCoreModule {
   }
 
   /**
-   * Returns canvas absolute point (in px) between two waypoints with angle
-   * @param {EditorWaypoint} a
-   * @param {EditorWaypoint} b
-   * @param {number} distance
-   * @return {[x: number, y: number, a: number]}
-   */
-  getPointBetweenWaypoints(a, b, distance) {
-    const ax = a.rect.x + (a.rect.width / 2);
-    const ay = a.rect.y + (a.rect.height / 2);
-    const bx = b.rect.x + (b.rect.width / 2);
-    const by = b.rect.y + (b.rect.height / 2);
-    return getPointBetween(ax, ay, bx, by, distance);
-  }
-
-  /**
    *
    * @param {BoardWaypointSegment} segment
    * @param {number} rx
@@ -227,10 +265,11 @@ export default class EditorScene extends SceneCoreModule {
    *
    * @param {EditorWaypoint} from
    * @param {EditorWaypoint} to
+   * @param {boolean} [directed]
    * @returns {EditorWaypointsConnection}
    */
-  createWaypointsConnection(from, to) {
-    const bwc = this.board.createWaypointsConnection(from.bwp, to.bwp);
+  createWaypointsConnection(from, to, directed) {
+    const bwc = this.board.createWaypointsConnection(from.bwp, to.bwp, directed);
     const conn = new EditorWaypointsConnection(from, to, bwc);
     this.connections.push(conn);
     return conn;
@@ -260,8 +299,24 @@ export default class EditorScene extends SceneCoreModule {
     }
 
     // draw waypoints
-    for (const wp of this.waypoints) {
-      wp.draw(this.canvas.c, this.image);
+    for (const ewp of this.waypoints) {
+      ewp.draw(this.canvas.c, this.image);
+    }
+
+    for (const [segment, bwp] of this.board.startings.entries()) {
+      const [x, y] = this.image.r2a(bwp.rx, bwp.ry);
+      let theme = { size: 6, color: '#ffffff' };
+      switch (segment) {
+        case BoardWaypointSegment.RingOuter: theme = EditorTheme.Waypoint.StartingMarks.RingOuter; break;
+        case BoardWaypointSegment.RingMiddle: theme = EditorTheme.Waypoint.StartingMarks.RingMiddle; break;
+        case BoardWaypointSegment.RingInner: theme = EditorTheme.Waypoint.StartingMarks.RingInner; break;
+      }
+      const { color, size } = theme;
+      this.canvas.c.beginPath();
+      this.canvas.c.arc(x, y, size, 0, this.TAU);
+      this.canvas.c.fillStyle = color;
+      this.canvas.c.fill();
+      this.canvas.c.closePath();
     }
   }
 

@@ -1,5 +1,4 @@
 import CoreModule from '../core-module.mjs';
-import { getNodeParents, hasNodeParent } from '../utils.mjs';
 
 export default class ContextMenuCoreModule extends CoreModule {
 
@@ -56,9 +55,13 @@ export default class ContextMenuCoreModule extends CoreModule {
           const index = Array
             .from(this.element.childNodes)
             .indexOf(parent);
-          if (index !== -1) {
+          if (index !== -1 && this.items[index] !== undefined) {
             const item = this.items[index];
-            if (item !== undefined && item.label !== undefined && item.handler !== undefined) {
+            if (item.disabled) {
+              event.stopPropagation();
+              return;
+            }
+            if (item.label !== undefined && item.handler !== undefined) {
               item.handler(event);
             }
             break;
@@ -88,6 +91,7 @@ export default class ContextMenuCoreModule extends CoreModule {
    * @typedef {Object} ContextMenuItem
    * @property {string} [label]
    * @property {ContextMenuItemActivator|boolean} [active=true]
+   * @property {boolean} [disabled=false]
    * @property {ContextMenuItemHandler} [handler]
    */
   /**
@@ -120,6 +124,9 @@ export default class ContextMenuCoreModule extends CoreModule {
       const li = this.element
         .appendChild(window.document.createElement('li'));
       li.textContent = item.label;
+      if (item.disabled === true) {
+        li.classList.add('disabled');
+      }
     }
 
     const overWidth = (left + this.element.offsetWidth) - window.innerWidth;

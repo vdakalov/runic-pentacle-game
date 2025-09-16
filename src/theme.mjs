@@ -1,0 +1,81 @@
+
+export const EditorTheme = {
+  Waypoint: {
+    /**
+     * Waypoints square size and color by segments
+     */
+    SegmentStyle: {
+      RingOuter: {
+        size: 16,
+        color: '#314026'
+      },
+      RingMiddle: {
+        size: 16,
+        color: '#739559'
+      },
+      RingInner: {
+        size: 16,
+        color: '#b5ea8c'
+      },
+      Element: {
+        size: 16,
+        color: '#1684c9'
+      },
+      Line: {
+        size: 16,
+        color: '#8bc2e4'
+      },
+      Event: {
+        size: 16,
+        color: '#fb3f1e'
+      }
+    },
+    /**
+     * Starting waypoint marks
+     */
+    StartingMarks: {
+      RingOuter: {
+        size: 6,
+        color: '#ffffff'
+      },
+      RingMiddle: {
+        size: 4,
+        color: '#afafaf'
+      },
+      RingInner: {
+        size: 2,
+        color: '#6f6f6f'
+      }
+    },
+    /**
+     * Change waypoint square size on pointer hover
+     */
+    ResizeOnHover: 1.2,
+    /**
+     * Frame for display selection on waypoint
+     */
+    SelectionFrame: {
+      Margin: 2,
+      LineWidth: 1,
+    }
+  },
+  Connection: {
+    Style: {
+      Default: {
+        Color: '#e36414',
+        LineWidth: 2,
+      },
+      Selected: {
+        Color: '#9a031e',
+        LineWidth: 4,
+      },
+      Undone: {
+        Color: '#fb8b24',
+        LineWidth: 2,
+      }
+    },
+    DirectionMarkerStyle: {
+      Size: 6
+    }
+  }
+};

@@ -19,11 +19,15 @@ export const BoardWaypointSegment = createEnum({
   /**
    * Pentacle line (diagonal) cell
    */
-  Line: 4,
+  LineVLeft: 4,
+  LineVRight: 5,
+  LineHTop: 6,
+  LineHLeft: 7,
+  LineHRight: 8,
   /**
    * Pentacle suddenly event cell
    */
-  Event: 5,
+  Event: 9,
 });
 
 export default class BoardWaypoint {
@@ -66,11 +70,11 @@ export default class BoardWaypoint {
     this.connections = [];
   }
 
+  /**
+   *
+   * @return {*}
+   */
   toObject() {
-    return {
-      k: this.kind,
-      x: this.rx,
-      y: this.ry
-    }
+    return [this.segment, this.rx, this.ry];
   }
 }

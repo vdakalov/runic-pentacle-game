@@ -73,6 +73,12 @@ export default class WayPointsMode extends EditorMode {
      * @type {EditorWaypointSelection[]}
      */
     this.selections = [];
+    /**
+     *
+     * @type {boolean}
+     * @private
+     */
+    this._changes = false;
   }
 
   /**
@@ -84,7 +90,7 @@ export default class WayPointsMode extends EditorMode {
   createContextMenu(bpe, ewp) {
     return [
       { label: `Def. Seg.: ${BoardWaypointSegment[this.segment]}`, active: ewp === undefined,
-        handler: this.nextSegment.bind(this, bpe) },
+        handler: this.nextSegment.bind(this, bpe, ewp) },
       { label: `Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`, active: ewp !== undefined,
         handler: this.nextSegment.bind(this, bpe, ewp) },
       { label: 'Delete', active: ewp !== undefined,
@@ -105,6 +111,7 @@ export default class WayPointsMode extends EditorMode {
       const ewp = this.editor.createWaypoint(this.segment, bpe.rx, bpe.ry)
       this.setHover(ewp);
       this.setSelected([ewp]);
+      this.editor.save();
     }
   }
 
@@ -147,6 +154,10 @@ export default class WayPointsMode extends EditorMode {
   onPointerUp(bpe) {
     if (this.selections.length !== 0) {
       bpe.origin.preventDefault();
+      if (this._changes) {
+        this.editor.save();
+        this._changes = false;
+      }
     }
   }
 
@@ -156,8 +167,11 @@ export default class WayPointsMode extends EditorMode {
    * @param {BoardPointerEvent} down
    */
   onPointerTranslate(bpe, down) {
-    for (const ews of this.selections) {
-      ews.move(bpe, down);
+    if (this.selections.length !== 0) {
+      this._changes = true;
+      for (const ews of this.selections) {
+        ews.move(bpe, down);
+      }
     }
   }
 
@@ -220,6 +234,7 @@ export default class WayPointsMode extends EditorMode {
     event.stopPropagation();
     if (ewp !== undefined) {
       ewp.segment = BoardWaypoint.getNextSegment(ewp.segment);
+      this.editor.save();
     } else {
       this.segment = BoardWaypoint.getNextSegment(this.segment);
     }
@@ -235,5 +250,6 @@ export default class WayPointsMode extends EditorMode {
       return;
     }
     this.editor.deleteWaypoint(ewp);
+    this.editor.save();
   }
 }
