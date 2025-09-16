@@ -68,4 +68,19 @@ export default class BoardCoreModule extends CoreModule {
     this.connections.push(conn);
     return conn;
   }
+
+  /**
+   *
+   * @param {BoardWaypointsConnection} bwc
+   * @returns {boolean} has connection deleted
+   */
+  deleteWaypointsConnection(bwc) {
+    const index = this.connections.indexOf(bwc);
+    if (index !== -1) {
+      this.connections.splice(index, 1);
+      bwc.destroy();
+      return true;
+    }
+    return false;
+  }
 }

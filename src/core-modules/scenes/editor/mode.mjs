@@ -62,4 +62,11 @@ export default class EditorMode {
    * @param {BoardPointerEvent} down
    */
   onPointerTranslate(bpe, down) {}
+
+  /**
+   *
+   * @param {CanvasRenderingContext2D} c
+   * @param {ImageBoardCoreModule} image
+   */
+  draw(c, image) {}
 }

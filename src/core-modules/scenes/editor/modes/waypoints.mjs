@@ -2,6 +2,49 @@ import { Cursor } from '../../../../utils.mjs';
 import EditorMode from '../mode.mjs';
 import BoardWaypoint, { BoardWaypointSegment } from '../../../board/waypoint.mjs';
 
+class EditorWaypointSelection {
+  /**
+   *
+   * @param {EditorWaypoint} ewp
+   */
+  constructor(ewp) {
+    /**
+     *
+     * @type {EditorWaypoint}
+     * @readonly
+     */
+    this.ewp = ewp;
+    /**
+     *
+     * @type {number}
+     * @readonly
+     */
+    this.rx = this.ewp.bwp.rx;
+    /**
+     *
+     * @type {number}
+     * @readonly
+     */
+    this.ry = this.ewp.bwp.ry;
+
+    this.ewp.selected = true;
+  }
+
+  destroy() {
+    this.ewp.selected = false;
+  }
+
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   * @param {BoardPointerEvent} down
+   */
+  move(bpe, down) {
+    this.ewp.bwp.rx = this.rx + (bpe.rx - down.rx);
+    this.ewp.bwp.ry = this.ry + (bpe.ry - down.ry);
+  }
+}
+
 export default class WayPointsMode extends EditorMode {
   /**
    *
@@ -9,6 +52,10 @@ export default class WayPointsMode extends EditorMode {
    */
   constructor(editor) {
     super(editor);
+    /**
+     *
+     * @type {string}
+     */
     this.cursor = Cursor.CrossHair;
     /**
      *
@@ -18,13 +65,14 @@ export default class WayPointsMode extends EditorMode {
     /**
      *
      * @type {EditorWaypoint|undefined}
+     * @private
      */
-    this.hover = undefined;
+    this._hovered = undefined;
     /**
      *
-     * @type {EditorWaypoint|undefined}
+     * @type {EditorWaypointSelection[]}
      */
-    this.active = undefined;
+    this.selections = [];
   }
 
   /**
@@ -44,44 +92,121 @@ export default class WayPointsMode extends EditorMode {
     ];
   }
 
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   */
   onPointerClick(bpe) {
     if (this.editor.cm.opened) {
       return;
     }
-    const ewp = this.editor.createWaypoint(this.segment, bpe.rx, bpe.ry);
-    ewp.hover = true;
+    const ewp = this.editor.waypoints.find(wp => wp.include(bpe.origin));
+    if (ewp === undefined) {
+      const ewp = this.editor.createWaypoint(this.segment, bpe.rx, bpe.ry)
+      this.setHover(ewp);
+      this.setSelected([ewp]);
+    }
   }
 
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   */
   onPointerMove(bpe) {
-    if (this.hover !== undefined) {
-      this.hover.hover = false;
-    }
-    this.hover = this.editor.waypoints
+    const ewp = this.editor.waypoints
       .find(wp => wp.include(bpe.origin));
-    if (this.hover !== undefined) {
-      this.hover.hover = true;
+    if (ewp !== undefined) {
+      this.setHover(ewp);
       this.cursor = Cursor.Move;
     } else {
+      this.unsetHover();
       this.cursor = Cursor.CrossHair;
     }
   }
 
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   */
   onPointerDown(bpe) {
-    this.active = this.editor.waypoints
+    const ewp = this.editor.waypoints
       .find(wp => wp.include(bpe.origin));
+    if (ewp !== undefined) {
+      if (!this.isSelected(ewp)) {
+        this.setSelected([ewp], bpe.origin.ctrlKey);
+      }
+    } else {
+      this.deselectAll();
+    }
   }
 
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   */
   onPointerUp(bpe) {
-    if (this.active !== undefined) {
+    if (this.selections.length !== 0) {
       bpe.origin.preventDefault();
     }
-    this.active = undefined;
   }
 
+  /**
+   *
+   * @param {BoardPointerEvent} bpe
+   * @param {BoardPointerEvent} down
+   */
   onPointerTranslate(bpe, down) {
-    if (this.active !== undefined) {
-      this.active.bwp.rx = bpe.rx;
-      this.active.bwp.ry = bpe.ry;
+    for (const ews of this.selections) {
+      ews.move(bpe, down);
+    }
+  }
+
+  /**
+   *
+   * @param {EditorWaypoint} ewp
+   */
+  setHover(ewp) {
+    if (this._hovered === ewp) {
+      return;
+    }
+    this.unsetHover();
+    this._hovered = ewp;
+    this._hovered.hover = true;
+  }
+
+  unsetHover() {
+    if (this._hovered !== undefined) {
+      this._hovered.hover = false;
+      this._hovered = undefined;
+    }
+  }
+
+  /**
+   *
+   * @param {EditorWaypoint} ewp
+   * @return {boolean}
+   */
+  isSelected(ewp) {
+    return this.selections.find(ews => ews.ewp === ewp) !== undefined;
+  }
+
+  /**
+   *
+   * @param {EditorWaypoint[]} wps
+   * @param {boolean} [append=false]
+   */
+  setSelected(wps, append = false) {
+    if (append === false) {
+      this.deselectAll();
+    }
+    for (const ewp of wps) {
+      this.selections.push(new EditorWaypointSelection(ewp));
+    }
+  }
+
+  deselectAll() {
+    while (this.selections.length !== 0) {
+      this.selections.pop().destroy();
     }
   }
 

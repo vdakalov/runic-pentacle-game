@@ -81,6 +81,12 @@ export default class EditorWaypoint {
     this.hover = false;
 
     /**
+     * Is pointer selected
+     * @type {boolean}
+     */
+    this.selected = false;
+
+    /**
      *
      * @type {EditorWaypointsConnection[]}
      */
@@ -103,18 +109,20 @@ export default class EditorWaypoint {
   draw(c, image) {
     const [cx, cy] = image.r2a(this.bwp.rx, this.bwp.ry);
     const { size, color } = EditorWaypoint.styles[this.bwp.segment];
-    const x = this.rect.x = cx - (size / 2);
-    const y = this.rect.y = cy - (size / 2);
-    const w = this.rect.width = size;
-    const h = this.rect.height = size;
+    const updatedSize = this.hover ? size + 2 : size;
+    const x = this.rect.x = cx - (updatedSize / 2);
+    const y = this.rect.y = cy - (updatedSize / 2);
+    const w = this.rect.width = updatedSize;
+    const h = this.rect.height = updatedSize;
     c.beginPath();
     c.fillStyle = color;
     c.fillRect(x, y, w, h);
     c.closePath();
 
-    if (this.hover) {
+    if (this.selected) {
       c.beginPath();
       c.strokeStyle = color;
+      c.lineWidth = 1;
       c.strokeRect(x - 2, y - 2, w + 4, h + 4);
       c.closePath();
     }

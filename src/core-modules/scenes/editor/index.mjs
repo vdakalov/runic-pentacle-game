@@ -10,6 +10,7 @@ import WayPointsMode from './modes/waypoints.mjs';
 import ConnectionsMode from './modes/connections.mjs';
 import EditorWaypoint from './waypoint.mjs';
 import EditorWaypointsConnection from './waypoints-connection.mjs';
+import { getPointBetween } from '../../../utils.mjs';
 
 export default class EditorScene extends SceneCoreModule {
 
@@ -27,12 +28,6 @@ export default class EditorScene extends SceneCoreModule {
      * @type {EditorWaypointsConnection[]}
      */
     this.connections = [];
-
-    /**
-     *
-     * @type {[from: EditorWaypoint, to: BoardPointerEvent]}
-     */
-    this.connection = undefined;
 
     /**
      *
@@ -191,6 +186,21 @@ export default class EditorScene extends SceneCoreModule {
   }
 
   /**
+   * Returns canvas absolute point (in px) between two waypoints with angle
+   * @param {EditorWaypoint} a
+   * @param {EditorWaypoint} b
+   * @param {number} distance
+   * @return {[x: number, y: number, a: number]}
+   */
+  getPointBetweenWaypoints(a, b, distance) {
+    const ax = a.rect.x + (a.rect.width / 2);
+    const ay = a.rect.y + (a.rect.height / 2);
+    const bx = b.rect.x + (b.rect.width / 2);
+    const by = b.rect.y + (b.rect.height / 2);
+    return getPointBetween(ax, ay, bx, by, distance);
+  }
+
+  /**
    *
    * @param {BoardWaypointSegment} segment
    * @param {number} rx
@@ -220,26 +230,29 @@ export default class EditorScene extends SceneCoreModule {
    * @returns {EditorWaypointsConnection}
    */
   createWaypointsConnection(from, to) {
-    const conn = new EditorWaypointsConnection(from, to);
+    const bwc = this.board.createWaypointsConnection(from.bwp, to.bwp);
+    const conn = new EditorWaypointsConnection(from, to, bwc);
     this.connections.push(conn);
     return conn;
+  }
+
+  /**
+   *
+   * @param {EditorWaypointsConnection} ewc
+   */
+  deleteWaypointsConnection(ewc) {
+    this.board.deleteWaypointsConnection(ewc.bwc);
+    const index = this.connections.indexOf(ewc);
+    if (index !== -1) {
+      this.connections.splice(index, 1);
+      ewc.destroy();
+    }
   }
 
   draw() {
     this.canvas.cursor = this._mode.cursor;
 
-    // draw connection
-    if (this.connection !== undefined) {
-      const [ewp, bpe] = this.connection;
-      const [fx, fy] = this.image.r2a(ewp.bwp.rx, ewp.bwp.ry);
-      this.canvas.c.beginPath();
-      this.canvas.c.moveTo(fx, fy);
-      this.canvas.c.lineTo(bpe.cx, bpe.cy);
-      this.canvas.c.lineWidth = 1;
-      this.canvas.c.strokeStyle = 'gray';
-      this.canvas.c.stroke();
-      this.canvas.c.closePath();
-    }
+    this._mode.draw(this.canvas.c, this.image);
 
     // draw connections
     for (const conn of this.connections) {

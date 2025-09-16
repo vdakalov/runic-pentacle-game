@@ -135,7 +135,7 @@ export default class PointerBoardCoreModule extends CoreModule {
       const y = Math.abs(this._down.cy - event.offsetY);
       this._click = this._clickThreshold > x && this._clickThreshold > y;
       for (const handler of this.onPointerTranslate) {
-        handler(bpe);
+        handler(bpe, this._down);
       }
     }
   }
@@ -161,10 +161,10 @@ export default class PointerBoardCoreModule extends CoreModule {
    * @private
    */
   _onMouseUp(event) {
-    this._down = undefined;
     const bpe = this.createBoardPointerEvent(event);
     for (const handler of this.onPointerUp) {
-      handler(bpe);
+      handler(bpe, this._down);
     }
+    this._down = undefined;
   }
 }
