@@ -84,3 +84,18 @@ export function getPointBetween(ax, ay, bx, by, distance) {
   const ry = mx * sin + my * cos;
   return [rx, ry, a];
 }
+
+/**
+ *
+ * @param {Object} object
+ * @param {number} [omitLast=0] Number of last prototypes to be excluded from result
+ * @returns {Function[]}
+ */
+export function getObjectPrototypes(object, omitLast = 0) {
+  const result = [];
+  while ((object = Object.getPrototypeOf(object)) !== null) {
+    result.push(object.constructor);
+  }
+  result.splice(result.length - omitLast, omitLast);
+  return result;
+}

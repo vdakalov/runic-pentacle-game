@@ -5,8 +5,9 @@ import ResizeCanvasCoreModule from './core-modules/canvas/resize.mjs';
 import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
 import ContextMenuCoreModule from './core-modules/context-menu.mjs';
 import StorageCoreModule from './core-modules/storage.mjs';
-import MenuSceneCoreModule from './core-modules/scenes/menu.mjs';
+import MenuScene from './core-modules/scenes/menu.mjs';
 import EditorScene from './core-modules/scenes/editor/index.mjs';
+import PentacleScene from './core-modules/scenes/pentacle/index.mjs';
 
 export default class Application {
   constructor() {
@@ -32,15 +33,14 @@ export default class Application {
       ContextMenuCoreModule,
 
       // Scenes
-      // MenuSceneCoreModule,
-      EditorScene,
+      // MenuScene,
+      // EditorScene,
+      PentacleScene,
     ]);
 
     // start request animation frame system
     this.core
       .get(RafCoreModule)
       .resume();
-
-
   }
 }

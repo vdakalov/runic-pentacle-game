@@ -6,6 +6,40 @@ canvas {
   display: block;
 }
 
+.ContextMenu {
+  list-style: none;
+  margin: 0;
+  padding: 0.6em 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: white;
+  border: 1px solid #808080;
+  box-shadow: 0 0 5px 1px #000000;
+}
+
+.ContextMenu > li {
+  min-width: 4em;
+  white-space: nowrap;
+  font-family: sans-serif;
+}
+
+.ContextMenu > .SeparatorItem {
+  padding: 0 1em;
+}
+
+.ContextMenu > .TextItem {
+  padding: 0.4em 1em;
+}
+
+.ContextMenu > .ActiveTextItem:not(.inactive):hover {
+  background-color: #ededed;
+}
+
+.ContextMenu > .ActiveTextItem.inactive {
+  color: #808080;
+}
+
 .ContextMenuCoreModule {
   list-style: none;
   margin: 0;
