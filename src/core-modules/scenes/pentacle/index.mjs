@@ -38,7 +38,7 @@ export default class PentacleScene extends SceneCoreModule {
      * @type {ContextMenuCtrl}
      * @private
      */
-    this._cm = new ContextMenuCtrl(this.canvas.element, this._contextMenuBuilder.bind(this));
+    this.cmc = new ContextMenuCtrl(this.canvas.element, this._contextMenuBuilder.bind(this));
   }
 
   /**
@@ -54,7 +54,7 @@ export default class PentacleScene extends SceneCoreModule {
       new ActiveTextItem('Active text item (true)', (e) => {
         console.log('Active text item (true)', e);
         return true;
-      }),
+      }, false, event),
       new ActiveTextItem('Active text item (false)', (e) => {
         console.log('Active text item (false)', e);
         return false;

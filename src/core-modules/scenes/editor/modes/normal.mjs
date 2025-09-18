@@ -1,4 +1,5 @@
 import EditorMode from '../mode.mjs';
+import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 
 export default class NormalMode extends EditorMode {
   /**
@@ -9,10 +10,10 @@ export default class NormalMode extends EditorMode {
     super(editor);
   }
 
-  createContextMenu(bpe, ewp) {
+  contextMenuBuilder(bpe, ewp) {
     return [
-      { label: 'Load', handler: () => this.editor.load() },
-      { label: 'Save', handler: () => this.editor.save() }
+      new ActiveTextItem('Load', this.editor.load.bind(this.editor)),
+      new ActiveTextItem('Save', this.editor.save.bind(this.editor))
     ];
   }
 }

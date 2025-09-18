@@ -1,6 +1,7 @@
 import { Cursor } from '../../../../utils.mjs';
 import EditorMode from '../mode.mjs';
 import BoardWaypoint, { BoardWaypointSegment } from '../../../board/waypoint.mjs';
+import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 
 class EditorWaypointSelection {
   /**
@@ -87,14 +88,14 @@ export default class WayPointsMode extends EditorMode {
    * @param {EditorWaypoint} [ewp]
    * @returns {ContextMenuItem[]}
    */
-  createContextMenu(bpe, ewp) {
+  contextMenuBuilder(bpe, ewp) {
     return [
-      { label: `Def. Seg.: ${BoardWaypointSegment[this.segment]}`, active: ewp === undefined,
-        handler: this.nextSegment.bind(this, bpe, ewp) },
-      { label: `Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`, active: ewp !== undefined,
-        handler: this.nextSegment.bind(this, bpe, ewp) },
-      { label: 'Delete', active: ewp !== undefined,
-        handler: this.deleteWaypoint.bind(this, ewp) }
+      new ActiveTextItem(
+        `Def. Seg.: ${BoardWaypointSegment[this.segment]}`,
+        this.nextSegment.bind(this, bpe, ewp), ewp !== undefined, bpe.origin),
+      new ActiveTextItem(`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`,
+        this.nextSegment.bind(this, bpe, ewp), ewp === undefined, bpe.origin),
+      new ActiveTextItem('Delete', this.deleteWaypoint.bind(this, ewp), ewp === undefined),
     ];
   }
 
@@ -103,7 +104,7 @@ export default class WayPointsMode extends EditorMode {
    * @param {BoardPointerEvent} bpe
    */
   onPointerClick(bpe) {
-    if (this.editor.cm.opened) {
+    if (this.editor.cmc.menu.opened) {
       return;
     }
     const ewp = this.editor.waypoints.find(wp => wp.include(bpe.origin));
@@ -228,17 +229,15 @@ export default class WayPointsMode extends EditorMode {
    *
    * @param {BoardPointerEvent} bpe
    * @param {EditorWaypoint} [ewp]
-   * @param {MouseEvent} event
    */
-  nextSegment(bpe, ewp, event) {
-    event.stopPropagation();
+  nextSegment(bpe, ewp) {
     if (ewp !== undefined) {
       ewp.segment = BoardWaypoint.getNextSegment(ewp.segment);
       this.editor.save();
     } else {
       this.segment = BoardWaypoint.getNextSegment(this.segment);
     }
-    this.editor.onCanvasContextMenu(bpe.origin);
+    return true;
   }
 
   /**

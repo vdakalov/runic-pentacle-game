@@ -28,7 +28,7 @@ export default class EditorMode {
    * @param {EditorWaypoint} [ewp]
    * @returns {ContextMenuItem[]}
    */
-  createContextMenu(bpe, ewp) {
+  contextMenuBuilder(bpe, ewp) {
     return [];
   }
 

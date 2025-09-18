@@ -3,7 +3,6 @@ import RafCoreModule from './core-modules/raf.mjs';
 import CanvasCoreModule from './core-modules/canvas/index.mjs';
 import ResizeCanvasCoreModule from './core-modules/canvas/resize.mjs';
 import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
-import ContextMenuCoreModule from './core-modules/context-menu.mjs';
 import StorageCoreModule from './core-modules/storage.mjs';
 import MenuScene from './core-modules/scenes/menu.mjs';
 import EditorScene from './core-modules/scenes/editor/index.mjs';
@@ -28,9 +27,6 @@ export default class Application {
       CanvasCoreModule,
       ResizeCanvasCoreModule,
       MountCanvasCoreModule,
-
-      // context menu modules
-      ContextMenuCoreModule,
 
       // Scenes
       // MenuScene,

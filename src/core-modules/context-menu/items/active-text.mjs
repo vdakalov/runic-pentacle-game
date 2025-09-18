@@ -30,9 +30,11 @@ export default class ActiveTextItem extends TextItem {
 
   /**
    * The handler can returns:
-   * - true - for reopen (update) menu
+   * - true - for update menu
    * - false - don't close menu
    * - undefined - just close menu
+   *
+   * In order to update menu from handler `cme` parameter should be defined for `ActiveTextItem`
    * @typedef {Function} ContextMenuItemHandler
    * @param {MouseEvent} event
    * @returns {boolean|void} true - reopen (update), false - don't close, void - close
@@ -42,8 +44,9 @@ export default class ActiveTextItem extends TextItem {
    * @param {string} text Item text
    * @param {ContextMenuItemHandler} [handler] Inactive item if not specified
    * @param {boolean} [disabled]
+   * @param {MouseEvent} [cme] Context Menu Event - Required for update menu from handler
    */
-  constructor(text, handler, disabled) {
+  constructor(text, handler, disabled, cme) {
     super(text, disabled);
 
     /**
@@ -52,6 +55,12 @@ export default class ActiveTextItem extends TextItem {
      * @private
      */
     this._handler = undefined;
+
+    /**
+     *
+     * @type {MouseEvent|undefined}
+     */
+    this.contextMenuEvent = cme;
 
     this.handler = handler;
 
@@ -67,7 +76,11 @@ export default class ActiveTextItem extends TextItem {
     if (typeof this._handler === 'function') {
       const result = this._handler(event);
       if (result === true) {
-        this._menu.update();
+        if (this.contextMenuEvent === undefined) {
+          throw new ReferenceError(`${this.constructor.name
+          }: Unable update menu: No contextmenu event defined`);
+        }
+        this._menu.update(this.contextMenuEvent);
       } else if (result !== false) {
         this._menu.close();
       }

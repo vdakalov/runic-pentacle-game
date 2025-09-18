@@ -2,9 +2,11 @@ import SceneCoreModule from '../../scene/index.mjs';
 import ImageBoardCoreModule from '../../board/image.mjs';
 import BoardCoreModule from '../../board/index.mjs';
 import PointerBoardCoreModule from '../../board/pointer/index.js';
-import ContextMenuCoreModule from '../../context-menu.mjs';
 import MenuScene from '../menu.mjs';
 import StorageCoreModule from '../../storage.mjs';
+import ContextMenuCtrl from '../../context-menu/ctrl.js';
+import ActiveTextItem from '../../context-menu/items/active-text.mjs';
+import SeparatorItem from '../../context-menu/items/separator.js';
 import NormalMode from './modes/normal.mjs';
 import WayPointsMode from './modes/waypoints.mjs';
 import ConnectionsMode from './modes/connections.mjs';
@@ -86,12 +88,9 @@ export default class EditorScene extends SceneCoreModule {
     this.pointer = this.core.get(PointerBoardCoreModule);
     /**
      *
-     * @type {ContextMenuCoreModule}
+     * @type {ContextMenuCtrl}
      */
-    this.cm = this.core.get(ContextMenuCoreModule);
-
-    this.canvas.element.addEventListener('contextmenu',
-      this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this));
+    this.cmc = new ContextMenuCtrl(this.canvas.element, this._contextMenuBuilder.bind(this));
 
     this.pointer.onPointerClick.push(this.onPointerClick = this.onPointerClick.bind(this));
     this.pointer.onPointerMove.push(this.onPointerMove = this.onPointerMove.bind(this));
@@ -110,7 +109,7 @@ export default class EditorScene extends SceneCoreModule {
     this.pointer.onPointerUp.splice(this.pointer.onPointerUp.indexOf(this.onPointerUp), 1);
     this.pointer.onPointerTranslate.splice(this.pointer.onPointerTranslate.indexOf(this.onPointerTranslate), 1);
     this.canvas.cursor = '';
-    this.canvas.element.removeEventListener('contextmenu', this.onCanvasContextMenu);
+    this.cmc.destroy();
     this.core.unload(
       BoardCoreModule,
       ImageBoardCoreModule,
@@ -142,9 +141,9 @@ export default class EditorScene extends SceneCoreModule {
   /**
    *
    * @param {MouseEvent} event
+   * @returns {ContextMenuItem[]}
    */
-  onCanvasContextMenu(event) {
-    event.preventDefault();
+  _contextMenuBuilder(event) {
     const bpe = this.pointer.createBoardPointerEvent(event);
     const ewp = this.waypoints.find(wp => wp.include(event));
 
@@ -152,49 +151,32 @@ export default class EditorScene extends SceneCoreModule {
      *
      * @type {ContextMenuItem[]}
      */
-    const items = this._mode.createContextMenu(bpe, ewp);
+    const items = this._mode.contextMenuBuilder(bpe, ewp);
 
     items.push(
-      { active: items.length !== 0 },
-      { label: `Mode: ${this._mode.constructor.name }`,
-        active: !this._modeSelection,
-        handler: e => {
-          this._modeSelection = true;
-          e.stopPropagation();
-          this.onCanvasContextMenu(event);
-        }
-      },
-      ...this._modes.map(mode => ({
-        label: mode.constructor.name,
-        active: this._modeSelection,
-        disabled: mode === this._mode,
-        handler: this.selectMode.bind(this, mode, event)
-      })),
-      { label: 'Cancel', active: this._modeSelection,
-        handler: e => {
-          this._modeSelection = false;
-          e.stopPropagation();
-          this.onCanvasContextMenu(event);
-        }
-      },
-      { active: this._modeSelection }
+      new SeparatorItem(items.length === 0),
+      new ActiveTextItem(`Mode: ${this._mode.constructor.name }`, () => {
+        this._modeSelection = !this._modeSelection;
+        return true;
+      }, false, event),
+      ...this._modes.map(mode => new ActiveTextItem(mode.constructor.name,
+        mode === this._mode ? undefined : this.selectMode.bind(this, mode),
+        !this._modeSelection, event)),
+      new SeparatorItem(!this._modeSelection)
     );
 
-    items.push({ label: 'Close Editor', handler: this.close.bind(this) });
-    this.cm.openAtMouseEvent(event, items);
+    items.push(new ActiveTextItem('Close Editor', this.close.bind(this)));
+    return items;
   }
 
   /**
    *
    * @param {EditorMode} mode
-   * @param {MouseEvent} origin
-   * @param {MouseEvent} event
    */
-  selectMode(mode, origin, event) {
+  selectMode(mode) {
     this._mode = mode;
     this._modeSelection = false;
-    event.stopPropagation();
-    this.onCanvasContextMenu(origin);
+    return true;
   }
 
   /**
