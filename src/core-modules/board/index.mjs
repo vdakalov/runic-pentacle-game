@@ -139,4 +139,14 @@ export default class BoardCoreModule extends CoreModule {
     }
     return false;
   }
+
+  /**
+   *
+   * @param {...BoardWaypointSegment[]} segments
+   * @return {BoardWaypoint[]}
+   */
+  findWaypoints(...segments) {
+    return this.waypoints
+      .filter(bwp => segments.includes(bwp.segment));
+  }
 }

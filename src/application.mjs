@@ -6,7 +6,7 @@ import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
 import StorageCoreModule from './core-modules/storage.mjs';
 import MenuScene from './core-modules/scenes/menu.mjs';
 import EditorScene from './core-modules/scenes/editor/index.mjs';
-import PentacleScene from './core-modules/scenes/pentacle/index.mjs';
+import PentacleScene from './core-modules/scenes/game/pentacle/index.mjs';
 
 export default class Application {
   constructor() {

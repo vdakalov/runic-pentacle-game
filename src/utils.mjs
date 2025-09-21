@@ -7,6 +7,12 @@ export const Cursor = {
 };
 
 /**
+ *
+ * @type {number}
+ */
+export const TAU = Math.PI * 2;
+
+/**
  * @template T
  * @param {T} obj
  * @return {T}

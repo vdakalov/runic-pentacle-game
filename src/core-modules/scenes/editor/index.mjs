@@ -15,6 +15,7 @@ import EditorWaypoint from './waypoint.mjs';
 import EditorWaypointsConnection from './waypoints-connection.mjs';
 import { EditorTheme } from '../../../theme.mjs';
 import { BoardWaypointSegment } from '../../board/waypoint.mjs';
+import { TAU } from '../../../utils.mjs';
 
 export default class EditorScene extends SceneCoreModule {
 
@@ -295,7 +296,7 @@ export default class EditorScene extends SceneCoreModule {
       }
       const { color, size } = theme;
       this.canvas.c.beginPath();
-      this.canvas.c.arc(x, y, size, 0, this.TAU);
+      this.canvas.c.arc(x, y, size, 0, TAU);
       this.canvas.c.fillStyle = color;
       this.canvas.c.fill();
       this.canvas.c.closePath();

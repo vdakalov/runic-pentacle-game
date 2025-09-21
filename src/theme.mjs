@@ -79,3 +79,31 @@ export const EditorTheme = {
     }
   }
 };
+
+export const Game = {
+  Players: [{
+    Size: 16,
+    Color: '',
+  }],
+  Pentacle: {
+    Stones: {
+      Energy: {
+        Size: 0.028, // relative to board image size
+        Color: '#52b788'
+      },
+      Information: {
+        Size: 0.028,
+        Color: '#5fa8d3'
+      },
+      Motivation: {
+        Size: 0.028,
+        Color: '#e2e2df'
+      }
+    },
+    Rune: {
+      Width: 0.044,
+      Height: 0.022,
+      Color: '#cd9777'
+    }
+  }
+};
