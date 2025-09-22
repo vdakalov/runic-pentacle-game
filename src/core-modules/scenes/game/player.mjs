@@ -1,16 +1,53 @@
+import { createEnum } from '../../../utils.mjs';
+import Rune from './pentacle/rune.mjs';
+
+export const Phase = createEnum({
+  Initial: 0,
+  RingMoving: 1,
+  LinesMoving: 2,
+})
 
 export default class Player {
+
   /**
    *
-   * @param {BoardWaypointSegment} initSegment
+   * @returns {string}
    */
-  constructor(initSegment) {
+  get phaseName() {
+    return Phase[this.phase];
+  }
+
+  /**
+   *
+   * @param {BoardWaypointSegment} segment
+   */
+  constructor(segment) {
     /**
      *
      * @type {BoardWaypointSegment}
      * @readonly
      */
-    this.initSegment = initSegment;
-
+    this.initialSegment = segment;
+    /**
+     *
+     * @type {BoardWaypointSegment}
+     * @readonly
+     */
+    this.segment = segment;
+    /**
+     * Player's game phase
+     * @type {Phase}
+     */
+    this.phase = Phase.Initial;
+    /**
+     *
+     * @type {Stone[]}
+     */
+    this.stones = [];
+    /**
+     *
+     * @type {Rune[]}
+     */
+    this.runes = [];
   }
 }

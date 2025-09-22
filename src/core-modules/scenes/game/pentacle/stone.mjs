@@ -27,6 +27,14 @@ export default class Stone extends SceneObject {
 
   /**
    *
+   * @returns {string}
+   */
+  get kindName() {
+    return StoneKind[this.kind];
+  }
+
+  /**
+   *
    * @param {StoneKind} kind
    * @param {BoardWaypoint} wp
    * @param {ImageBoardCoreModule} image

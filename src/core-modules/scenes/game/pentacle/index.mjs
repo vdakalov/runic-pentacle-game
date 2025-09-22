@@ -11,6 +11,9 @@ import TextItem from '../../../context-menu/items/text.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 import Stone, { StoneKind } from './stone.mjs';
 import Rune from './rune.mjs';
+import UfsEvent from './ufs-event.mjs';
+import Player, { Phase } from '../player.mjs';
+import PlayerObject from './player.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
   constructor(core) {
@@ -18,9 +21,15 @@ export default class PentacleScene extends SceneCoreModule {
 
     /**
      *
+     * @type {PlayerObject[]}
+     */
+    this.players = [];
+
+    /**
+     *
      * @type {Stone[]}
      */
-    this.active = [];
+    this.stones = [];
 
     this.core.load(
       BoardCoreModule,
@@ -62,8 +71,11 @@ export default class PentacleScene extends SceneCoreModule {
      * @private
      */
     this.cmc = new ContextMenuCtrl(this.canvas.element, this._contextMenuBuilder.bind(this));
-
-
+    /**
+     * Context Menu Mode
+     * @type {*}
+     */
+    this.cmm = undefined;
 
     this._initialize();
   }
@@ -75,22 +87,133 @@ export default class PentacleScene extends SceneCoreModule {
    * @private
    */
   _contextMenuBuilder(event) {
-    return [
-      new TextItem(`Just text item: ${Date.now()}`),
-      new SeparatorItem(),
-      new ActiveTextItem('Active text item (true)', (e) => {
-        console.log('Active text item (true)', e);
-        return true;
-      }, false, event),
-      new ActiveTextItem('Active text item (false)', (e) => {
-        console.log('Active text item (false)', e);
-        return false;
-      }),
-      new ActiveTextItem('Active text item (void)', (e) => {
-        console.log('Active text item (void)', e);
-      }),
-      new ActiveTextItem('Inactive text item')
+    /**
+     *
+     * @type {ContextMenuItem[]}
+     */
+    const items = [];
+
+    if (this.cmm instanceof PlayerObject) {
+      const po = this.cmm;
+      items.push(
+        new SeparatorItem(items.length === 0),
+        new ActiveTextItem(`Player ${po.segmentName}`,
+          this._cmSelectPlayer.bind(this, undefined), false, event),
+        new ActiveTextItem('Turn', this._cmPlayerTurn.bind(this, po), false, event),
+        new ActiveTextItem('Stats', this._cmPlayerStats.bind(this, po)),
+      );
+    } else {
+      for (const player of this.players) {
+        const item = new ActiveTextItem(`Player ${player.segmentName}`,
+          this._cmSelectPlayer.bind(this, player), false, event);
+        items.push(item);
+      }
+    }
+
+    items.push(
+      new SeparatorItem(items.length === 0),
+      new ActiveTextItem('Reset board', this._cmReset.bind(this))
+    );
+
+    return items;
+  }
+
+  _cmReset() {
+    this._initialize();
+  }
+
+  /**
+   *
+   * @param {PlayerObject|undefined} player
+   * @private
+   */
+  _cmSelectPlayer(player) {
+    this.cmm = player;
+    return true;
+  }
+
+  /**
+   *
+   * @param {PlayerObject} player
+   * @private
+   */
+  _cmPlayerTurn(player) {
+    const dice = this.game.promptDice();
+    const wp = this.game.getTurnWaypoint(player.game, player.wp, dice);
+
+    if (wp === undefined) {
+      window.alert('No waypoint found to make turn');
+      return;
+    }
+
+    switch (player.phase) {
+      case Phase.Initial:
+      case Phase.RingMoving:
+        if (player.wp.atElement && !player.isPhaseInitial) {
+          const answer = window.confirm('Do you wish moving over pentacle lines?');
+          if (answer) {
+            /**
+             *
+             * @type {BoardWaypoint[]}
+             */
+            const lines = [];
+            for (const bwc of player.wp.connections) {
+              const abw = bwc.getAnotherWaypoint(player.wp);
+              if (abw.atLine) {
+                lines.push(abw);
+              }
+            }
+            const options = lines.map((wp, index) => `${index + 1} - ${wp.segmentName}`);
+            const raw = window.prompt(`Which one:\n${options.join('\n')}`) || '';
+            const number = Number.parseInt(raw.trim());
+            if (Number.isInteger(number)) {
+              const wp = lines[number - 1];
+              if (wp !== undefined) {
+                player.setPhase(Phase.LinesMoving, wp.segment);
+                const fwp = dice === 1 ? wp :
+                  this.game.getTurnWaypoint(player.game, player.wp, dice)
+                player.setWaypoint(fwp);
+                this._pickupRune(player.game, fwp);
+                break;
+              }
+            }
+          }
+        }
+        player.setWaypoint(wp);
+        player.setPhase(Phase.RingMoving);
+        this._pickupStone(player.game, wp);
+        break;
+      case Phase.LinesMoving:
+        break;
+    }
+  }
+
+  /**
+   *
+   * @param {PlayerObject} player
+   * @private
+   */
+  _cmPlayerStats(player) {
+    const lines = [
+      'Player',
+      ` - Segment: ${player.segmentName}`,
     ];
+
+    lines.push(' - Stones:');
+    const stones = player.game.stones
+      .reduce((acc, stone) => {
+        if (!acc.hasOwnProperty(stone.kindName)) {
+          acc[stone.kindName] = 0;
+        }
+        acc[stone.kindName]++;
+        return acc;
+      }, {});
+    for (const [kindName, count] of Object.entries(stones)) {
+      lines.push(`    - ${kindName}: ${count}`);
+    }
+
+    const text = lines.join('\n');
+    window.alert(text);
   }
 
   _initializeStones() {
@@ -127,6 +250,7 @@ export default class PentacleScene extends SceneCoreModule {
       }
       const stoneKind = fromIndexStoneKindMap[indexFrom];
       const stone = new Stone(stoneKind, bwp, this.image);
+      this.stones.push(stone);
       this.objects.push(stone);
     }
   }
@@ -155,14 +279,69 @@ export default class PentacleScene extends SceneCoreModule {
     }
   }
 
+  _initializeUfsEvents() {
+    for (const wp of this.board.waypoints) {
+      if (wp.segment === BoardWaypointSegment.Event) {
+        const event = new UfsEvent(wp, this.image);
+        this.objects.push(event);
+      }
+    }
+  }
+
+  _initializePlayers() {
+    for (const gp of this.game.players) {
+      const wp = this.board.startings[gp.segment];
+      if (wp !== undefined) {
+        const po = new PlayerObject(gp, wp, this.image);
+        this.players.push(po);
+        this.objects.push(po);
+      }
+    }
+  }
+
   /**
    * Initialize game field
    */
   _initialize() {
     this.storage.restore();
     this.board.load();
+    this.objects.length = 0;
     this._initializeStones();
     this._initializeRunes();
+    this._initializeUfsEvents();
+    this._initializePlayers();
+  }
+
+  /**
+   *
+   * @param {Player} player
+   * @param {BoardWaypoint} wp
+   * @private
+   */
+  _pickupStone(player, wp) {
+    for (let index = 0; index < this.objects.length; index++) {
+      const object = this.objects[index];
+      if (object instanceof Stone && object.wp === wp) {
+        player.stones.push(object);
+        this.objects.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   *
+   * @param {Player} player
+   * @param {BoardWaypoint} wp
+   * @private
+   */
+  _pickupRune(player, wp) {
+    for (let index = 0; index < this.objects.length; index++) {
+      const object = this.objects[index];
+      if (object instanceof Rune && object.wp === wp) {
+        player.runes.push(object);
+        this.objects.splice(index, 1);
+      }
+    }
   }
 
   destroy() {

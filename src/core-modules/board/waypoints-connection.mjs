@@ -38,4 +38,24 @@ export default class BoardWaypointsConnection {
     this.from = this.to;
     this.to = temp;
   }
+
+  /**
+   *
+   * @param {BoardWaypoint} wp
+   * @returns {boolean}
+   */
+  hasWaypoint(wp) {
+    return this.from === wp || this.to === wp;
+  }
+
+  /**
+   *
+   * @param {BoardWaypoint} wp
+   * @returns {BoardWaypoint}
+   */
+  getAnotherWaypoint(wp) {
+    const wps = [this.from, this.to];
+    const index = wps.indexOf(wp);
+    return wps[(index + 1) % wps.length];
+  }
 }

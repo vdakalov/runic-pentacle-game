@@ -30,6 +30,27 @@ export const BoardWaypointSegment = createEnum({
   Event: 9,
 });
 
+export const SegmentsSets = {
+  /**
+   * @type {BoardWaypointSegment[]}
+   */
+  Rings: [
+    BoardWaypointSegment.RingOuter,
+    BoardWaypointSegment.RingMiddle,
+    BoardWaypointSegment.RingInner,
+  ],
+  /**
+   * @type {BoardWaypointSegment[]}
+   */
+  Lines: [
+    BoardWaypointSegment.LineVLeft,
+    BoardWaypointSegment.LineVRight,
+    BoardWaypointSegment.LineHTop,
+    BoardWaypointSegment.LineHLeft,
+    BoardWaypointSegment.LineHRight,
+  ]
+};
+
 export default class BoardWaypoint {
 
   /**
@@ -39,6 +60,45 @@ export default class BoardWaypoint {
    */
   static getNextSegment(segment) {
     return BoardWaypointSegment.hasOwnProperty(segment + 1) ? segment + 1 : 0;
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  get segmentName() {
+    return BoardWaypointSegment[this.segment];
+  }
+
+  /**
+   * Is the waypoint at any ring
+   * @returns {boolean}
+   */
+  get atRing() {
+    return SegmentsSets.Rings.indexOf(this.segment) !== -1;
+  }
+
+  /**
+   * Is the waypoint at any line
+   * @returns {boolean}
+   */
+  get atLine() {
+    return SegmentsSets.Lines.indexOf(this.segment) !== -1;
+  }
+
+  /**
+   * Is the waypoint at any element
+   * @returns {boolean}
+   */
+  get atElement() {
+    return this.segment === BoardWaypointSegment.Element;
+  }
+
+  /**
+   * Is the waypoint at any unforeseen event
+   */
+  get atEvent() {
+    return this.segment === BoardWaypointSegment.Event;
   }
 
   /**
@@ -68,6 +128,15 @@ export default class BoardWaypoint {
      * @type {BoardWaypointsConnection[]}
      */
     this.connections = [];
+  }
+
+  /**
+   * Check if the waypoint at least one of specified segments
+   * @param {...BoardWaypointSegment[]} segments
+   * @returns {boolean}
+   */
+  at(...segments) {
+    return segments.indexOf(this.segment) !== -1;
   }
 
   /**

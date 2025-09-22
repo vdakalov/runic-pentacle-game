@@ -82,8 +82,14 @@ export const EditorTheme = {
 
 export const Game = {
   Players: [{
-    Size: 16,
-    Color: '',
+    Size: 0.022,
+    Color: '#ff595e',
+  }, {
+    Size: 0.022,
+    Color: '#8ac926',
+  }, {
+    Size: 0.022,
+    Color: '#1982c4',
   }],
   Pentacle: {
     Stones: {
@@ -104,6 +110,10 @@ export const Game = {
       Width: 0.044,
       Height: 0.022,
       Color: '#cd9777'
+    },
+    UfsEvent: {
+      Size: 0.014,
+      Color: '#b5179e'
     }
   }
 };
