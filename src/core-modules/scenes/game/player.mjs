@@ -5,7 +5,7 @@ export const Phase = createEnum({
   Initial: 0,
   RingMoving: 1,
   LinesMoving: 2,
-})
+});
 
 export default class Player {
 

@@ -22,6 +22,11 @@ export default class GameCoreModule extends CoreModule {
     this._lastDicePromptValue = '';
   }
 
+  destroy() {
+    this.players.length = 0;
+    this._lastDicePromptValue = '';
+  }
+
   /**
    * Random number on dice (int in range 0-5)
    * @returns {number}
@@ -71,10 +76,11 @@ export default class GameCoreModule extends CoreModule {
          */
         let pwp = undefined;
         while (dice-- > 0) {
-          const lPwp = wp;
+          let lPwp = pwp;
           for (const wpc of wp.connections) {
             const awp = wpc.getAnotherWaypoint(wp);
             if (awp.at(player.segment) && awp !== pwp) {
+              lPwp = wp;
               wp = awp;
               break;
             }

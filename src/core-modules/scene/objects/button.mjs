@@ -41,10 +41,8 @@ export default class ButtonSceneObject extends LabelSceneObject {
       super.draw(c, false);
       this.drawUnderline(c);
       this.color = c.strokeStyle = color;
-      c.canvas.style.cursor = 'pointer';
     } else {
       this.drawUnderline(c);
-      c.canvas.style.cursor = '';
     }
   }
 }

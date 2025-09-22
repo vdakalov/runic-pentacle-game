@@ -117,3 +117,8 @@ export const Game = {
     }
   }
 };
+
+export const Assets = {
+  MenuLogo: '/assets/menu.jpg',
+  BoardImage: '/assets/board.png',
+};

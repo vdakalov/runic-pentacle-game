@@ -166,7 +166,7 @@ export default class EditorScene extends SceneCoreModule {
       new SeparatorItem(!this._modeSelection)
     );
 
-    items.push(new ActiveTextItem('Close Editor', this.close.bind(this)));
+    items.push(new ActiveTextItem('Close Editor', this.changeScene.bind(this, MenuScene)));
     return items;
   }
 
@@ -301,12 +301,5 @@ export default class EditorScene extends SceneCoreModule {
       this.canvas.c.fill();
       this.canvas.c.closePath();
     }
-  }
-
-  close(force = false) {
-    if (force !== true && !window.confirm('Are you sure?')) {
-      return;
-    }
-    this.changeScene(MenuScene);
   }
 }

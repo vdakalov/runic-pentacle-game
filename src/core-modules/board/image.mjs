@@ -1,6 +1,7 @@
 import CoreModule from '../../core-module.mjs';
 import RafCoreModule from '../raf.mjs';
 import CanvasCoreModule from '../canvas/index.mjs';
+import { Assets } from '../../theme.mjs';
 
 export default class ImageBoardCoreModule extends CoreModule {
   constructor(core) {
@@ -12,7 +13,7 @@ export default class ImageBoardCoreModule extends CoreModule {
      * @readonly
      */
     this.element = window.document.createElement('img');
-    this.element.src = '/assets/board.png';
+    this.element.src = Assets.BoardImage;
 
     this.core
       .get(RafCoreModule)

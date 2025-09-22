@@ -14,6 +14,7 @@ import Rune from './rune.mjs';
 import UfsEvent from './ufs-event.mjs';
 import Player, { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
+import MenuScene from '../../menu.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
   constructor(core) {
@@ -112,7 +113,8 @@ export default class PentacleScene extends SceneCoreModule {
 
     items.push(
       new SeparatorItem(items.length === 0),
-      new ActiveTextItem('Reset board', this._cmReset.bind(this))
+      new ActiveTextItem('Reset board', this._cmReset.bind(this)),
+      new ActiveTextItem('Menu', this.changeScene.bind(this, MenuScene))
     );
 
     return items;
@@ -289,10 +291,10 @@ export default class PentacleScene extends SceneCoreModule {
   }
 
   _initializePlayers() {
-    for (const gp of this.game.players) {
-      const wp = this.board.startings[gp.segment];
+    for (const player of this.game.players) {
+      const wp = this.board.startings[player.segment];
       if (wp !== undefined) {
-        const po = new PlayerObject(gp, wp, this.image);
+        const po = new PlayerObject(player, wp, this.image);
         this.players.push(po);
         this.objects.push(po);
       }
@@ -349,7 +351,9 @@ export default class PentacleScene extends SceneCoreModule {
     this.core.unload(
       BoardCoreModule,
       ImageBoardCoreModule,
-      PointerBoardCoreModule
+      PointerBoardCoreModule,
+      GameCoreModule,
     );
+    super.destroy();
   }
 }

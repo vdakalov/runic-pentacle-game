@@ -1,6 +1,7 @@
 import CoreModule from '../../core-module.mjs';
 import RafCoreModule from '../raf.mjs';
 import CanvasCoreModule from '../canvas/index.mjs';
+import { Cursor } from '../../utils.mjs';
 
 export default class SceneCoreModule extends CoreModule {
   constructor(core) {
@@ -61,6 +62,10 @@ export default class SceneCoreModule extends CoreModule {
     }
   }
 
+  /**
+   *
+   * @param {MouseEvent} event
+   */
   onClick(event) {
     const obj = this.objects
       .find(obj => obj.include(event.offsetX, event.offsetY));
@@ -70,8 +75,12 @@ export default class SceneCoreModule extends CoreModule {
   }
 
   draw() {
+    this.canvas.cursor = Cursor.Default;
     for (const obj of this.objects) {
       obj.draw(this.canvas.c);
+      if (obj.hover) {
+        this.canvas.cursor = Cursor.Pointer;
+      }
     }
   }
 }

@@ -80,10 +80,13 @@ export default class PlayerObject extends SceneObject {
      */
     this.wp = wp;
     /**
-     * Previous player waypoint
-     * @type {BoardWaypoint|undefined}
+     * For each pentacle's line there is a shift by x
+     * coordinate between their waypoints. So it is
+     * possible to define moving direction through that
+     * 2d axis
+     * @type {number}
      */
-    this.pwp = undefined;
+    this.movingDirection = 0;
     /**
      *
      * @type {ImageBoardCoreModule}
@@ -124,7 +127,6 @@ export default class PlayerObject extends SceneObject {
    * @param {BoardWaypoint} wp
    */
   setWaypoint(wp) {
-    this.pwp = this.wp;
     this.wp = wp;
     this._updatePosition();
   }

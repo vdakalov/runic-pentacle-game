@@ -29,9 +29,9 @@ export default class Application {
       MountCanvasCoreModule,
 
       // Scenes
-      // MenuScene,
+      MenuScene,
       // EditorScene,
-      PentacleScene,
+      // PentacleScene,
     ]);
 
     // start request animation frame system
