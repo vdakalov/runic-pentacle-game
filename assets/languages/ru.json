@@ -28,5 +28,11 @@
   "Stones": "Камни",
   "Energy": "Энергия",
   "Information": "Информация",
-  "Motivation": "Мотивация"
+  "Motivation": "Мотивация",
+  "Do you wish moving over pentacle lines?": "Желаете перейти на линии пентакля?",
+  "Which one": "На какую",
+  "Dice value": "Значение кубика",
+  "Dice value: {}": "Значение кубика: {}",
+  "cancel to random": "отмена для случайного",
+  "Runes": "Руны"
 }

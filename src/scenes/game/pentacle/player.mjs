@@ -81,7 +81,7 @@ export default class PlayerObject extends SceneObject {
     this.wp = wp;
     /**
      * Relative waypoint position
-     * @type {[rx: number, ry: number]}
+     * @type {[rx: number, ry: number, a: number]}
      * @private
      */
     this.position = [];
@@ -90,6 +90,11 @@ export default class PlayerObject extends SceneObject {
      * @type {ImageBoardCoreModule}
      */
     this.image = image;
+    /**
+     *
+     * @type {number}
+     */
+    this.direction = 0;
 
     this._defineWaypointPosition();
   }
@@ -99,7 +104,7 @@ export default class PlayerObject extends SceneObject {
    * @private
    */
   _defineWaypointPosition() {
-    this.position = [this.wp.rx, this.wp.ry];
+    this.position = [this.wp.rx, this.wp.ry, 0];
     if (this.wp.atElement) {
       const d = 0.042;
       const r = 0.021;
@@ -128,15 +133,23 @@ export default class PlayerObject extends SceneObject {
   }
 
   draw(c, updateRect = true) {
-    const [rx, ry] = this.position;
+    const [rx, ry, a] = this.position;
     const [ax, ay] = this.image.r2a(rx, ry);
     const { Color, Size } = Game.Players[this.game.initialSegment];
     const s = this.image.rect.width * Size;
     const hs = s / 2;
 
+    c.save();
+    c.translate(ax, ay);
+    c.rotate(a);
+
     c.beginPath();
     c.fillStyle = Color;
-    c.fillRect(ax - hs, ay - hs, s, s);
+    c.fillRect(-hs, -hs, s, s);
     c.closePath();
+
+    c.restore();
+
+    this.position[2] += 0.01;
   }
 }

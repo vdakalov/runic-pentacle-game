@@ -1,6 +1,7 @@
 import CoreModule from '../../core-module.mjs';
 import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
 import Player, { Phase } from './player.mjs';
+import l from '../../i18n.mjs';
 
 export default class GameCoreModule extends CoreModule {
   constructor(core) {
@@ -28,11 +29,11 @@ export default class GameCoreModule extends CoreModule {
   }
 
   /**
-   * Random number on dice (int in range 0-5)
+   * Random number on dice (int in range 1-6)
    * @returns {number}
    */
   dice() {
-    return Math.floor(Math.random() * 6);
+    return Math.floor(Math.random() * 6) + 1;
   }
 
   /**
@@ -40,14 +41,29 @@ export default class GameCoreModule extends CoreModule {
    * @returns {number}
    */
   promptDice() {
-    const msg = 'Dice value [1-6] (cancel to random):';
+    const msg = l`Dice value` + ' [1-6] (' + l`cancel to random` + '):';
     const raw = this._lastDicePromptValue = window
       .prompt(msg, this._lastDicePromptValue) || '';
     const int = Number.parseInt(raw.trim());
     if (Number.isInteger(int) && int > 0 && 6 >= int) {
       return int;
     }
-    return this.dice();
+    const value = this.dice();
+    window.alert(l`Dice value: ${value}`);
+    return value;
+  }
+
+  /**
+   * Check if waypoint is on the direction way
+   * @param {BoardWaypoint} from
+   * @param {BoardWaypoint} to
+   * @param {number} direction
+   * @returns {boolean}
+   */
+  onPlayerWay(from, to, direction) {
+    const dir = to.rx - from.rx;
+    return direction !== 0
+      && ((direction > 0 && dir > 0) || (0 > direction && 0 > dir));
   }
 
   /**
@@ -55,9 +71,10 @@ export default class GameCoreModule extends CoreModule {
    * @param {Player} player Turn's player
    * @param {BoardWaypoint} wp Init waypoint
    * @param {number} dice Dice value
+   * @param {number} [direction]
    * @returns {BoardWaypoint} Target turn waypoint
    */
-  getTurnWaypoint(player, wp, dice) {
+  getTurnWaypoint(player, wp, dice, direction = 0) {
     switch (player.phase) {
       case Phase.Initial:
       case Phase.RingMoving:
@@ -68,24 +85,14 @@ export default class GameCoreModule extends CoreModule {
         }
         break;
       case Phase.LinesMoving:
-        /**
-         * Previous waypoint to be sure
-         * moving continues in the same
-         * direction
-         * @type {undefined}
-         */
-        let pwp = undefined;
         while (dice-- > 0) {
-          let lPwp = pwp;
           for (const wpc of wp.connections) {
             const awp = wpc.getAnotherWaypoint(wp);
-            if (awp.at(player.segment) && awp !== pwp) {
-              lPwp = wp;
+            if (awp.at(player.segment) && this.onPlayerWay(wp, awp, direction)) {
               wp = awp;
               break;
             }
           }
-          pwp = lPwp;
         }
         break;
     }

@@ -142,39 +142,30 @@ export default class PentacleScene extends SceneCoreModule {
    */
   _cmPlayerTurn(player) {
     const dice = this.game.promptDice();
-    const wp = this.game.getTurnWaypoint(player.game, player.wp, dice);
-
-    if (wp === undefined) {
-      window.alert('No waypoint found to make turn');
-      return;
-    }
 
     switch (player.phase) {
       case Phase.Initial:
-      case Phase.RingMoving:
+      case Phase.RingMoving: {
         if (player.wp.atElement && !player.isPhaseInitial) {
-          const answer = window.confirm('Do you wish moving over pentacle lines?');
-          if (answer) {
+          const msg = l`Do you wish moving over pentacle lines?`;
+          if (window.confirm(msg)) {
             /**
              *
-             * @type {BoardWaypoint[]}
+             * @type {BoardWaypointsConnection[]}
              */
-            const lines = [];
-            for (const bwc of player.wp.connections) {
-              const abw = bwc.getAnotherWaypoint(player.wp);
-              if (abw.atLine) {
-                lines.push(abw);
-              }
-            }
-            const options = lines.map((wp, index) => `${index + 1} - ${wp.segmentName}`);
-            const raw = window.prompt(`Which one:\n${options.join('\n')}`) || '';
+            const lines = player.wp.connections
+              .filter(bwc => bwc.getAnotherWaypoint(player.wp).atLine);
+            const options = lines.map((bwc, index) =>
+              `${index + 1} - ${l(bwc.getAnotherWaypoint(player.wp).segmentName)}`);
+            const raw = window.prompt(`${l('Which one')}:\n${options.join('\n')}`) || '';
             const number = Number.parseInt(raw.trim());
             if (Number.isInteger(number)) {
-              const wp = lines[number - 1];
+              const wp = lines[number - 1].getAnotherWaypoint(player.wp);
               if (wp !== undefined) {
+                player.direction = wp.rx - player.wp.rx;
                 player.setPhase(Phase.LinesMoving, wp.segment);
                 const fwp = dice === 1 ? wp :
-                  this.game.getTurnWaypoint(player.game, player.wp, dice)
+                  this.game.getTurnWaypoint(player.game, player.wp, dice, player.direction);
                 player.setWaypoint(fwp);
                 this._pickupRune(player.game, fwp);
                 break;
@@ -182,12 +173,18 @@ export default class PentacleScene extends SceneCoreModule {
             }
           }
         }
+        const wp = this.game.getTurnWaypoint(player.game, player.wp, dice);
         player.setWaypoint(wp);
         player.setPhase(Phase.RingMoving);
         this._pickupStone(player.game, wp);
         break;
-      case Phase.LinesMoving:
+      }
+      case Phase.LinesMoving: {
+        const wp = this.game.getTurnWaypoint(player.game, player.wp, dice, player.direction);
+        player.setWaypoint(wp);
+        this._pickupRune(player.game, wp);
         break;
+      }
     }
   }
 
@@ -202,6 +199,7 @@ export default class PentacleScene extends SceneCoreModule {
       ' - ' + l`Segment: ${player.segmentName}`,
     ];
 
+    // stones
     lines.push(` - ${l`Stones`}:`);
     const stones = player.game.stones
       .reduce((acc, stone) => {
@@ -214,6 +212,9 @@ export default class PentacleScene extends SceneCoreModule {
     for (const [kindName, count] of Object.entries(stones)) {
       lines.push(`    - ${l`${kindName}`}: ${count}`);
     }
+
+    // runes
+    lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.kind)}`);
 
     const text = lines.join('\n');
     window.alert(text);
