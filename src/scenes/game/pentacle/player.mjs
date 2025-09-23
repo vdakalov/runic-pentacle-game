@@ -80,46 +80,32 @@ export default class PlayerObject extends SceneObject {
      */
     this.wp = wp;
     /**
-     * For each pentacle's line there is a shift by x
-     * coordinate between their waypoints. So it is
-     * possible to define moving direction through that
-     * 2d axis
-     * @type {number}
+     * Relative waypoint position
+     * @type {[rx: number, ry: number]}
+     * @private
      */
-    this.movingDirection = 0;
+    this.position = [];
     /**
      *
      * @type {ImageBoardCoreModule}
      */
     this.image = image;
-    /**
-     *
-     * @type {[x: number,y: number]}
-     */
-    this.position = [-1, -1];
+
+    this._defineWaypointPosition();
   }
 
   /**
-   *
-   * @return {[x: number, y: number]}
+   * Shift wp position on Elements wp
    * @private
    */
-  _getPosition() {
-    const d = this.image.rect.width * 0.042;
-    if (d === 0) {
-      return [-1, -1];
+  _defineWaypointPosition() {
+    this.position = [this.wp.rx, this.wp.ry];
+    if (this.wp.atElement) {
+      const d = 0.042;
+      const r = 0.021;
+      this.position[0] += (Math.random() * d) - r;
+      this.position[1] += (Math.random() * d) - r;
     }
-    const r = d / 2;
-    let [x, y] = this.image.r2a(this.wp.rx, this.wp.ry);
-    if (this.wp.segment === BoardWaypointSegment.Element) {
-      x += (Math.random() * d) - r;
-      y += (Math.random() * d) - r;
-    }
-    return [x, y];
-  }
-
-  _updatePosition() {
-    this.position = this._getPosition();
   }
 
   /**
@@ -128,7 +114,7 @@ export default class PlayerObject extends SceneObject {
    */
   setWaypoint(wp) {
     this.wp = wp;
-    this._updatePosition();
+    this._defineWaypointPosition();
   }
 
   /**
@@ -142,12 +128,8 @@ export default class PlayerObject extends SceneObject {
   }
 
   draw(c, updateRect = true) {
-    const [ax, ay] = this.position;
-    if (!Number.isFinite(ax) || !Number.isFinite(ay) || ax === -1 || ay === -1) {
-      // todo position does not updates on window resize
-      this._updatePosition();
-      return;
-    }
+    const [rx, ry] = this.position;
+    const [ax, ay] = this.image.r2a(rx, ry);
     const { Color, Size } = Game.Players[this.game.initialSegment];
     const s = this.image.rect.width * Size;
     const hs = s / 2;
