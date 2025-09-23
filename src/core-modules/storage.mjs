@@ -3,7 +3,6 @@ import CoreModule from '../core-module.mjs';
 export default class StorageCoreModule extends CoreModule {
   constructor(core) {
     super(core);
-    this._key = this.constructor.name;
     /**
      *
      * @type {Object.<string, Object.<string, *>>}
@@ -56,13 +55,43 @@ export default class StorageCoreModule extends CoreModule {
     }
   }
 
-  dump() {
-    const json = JSON.stringify(this._data);
-    window.localStorage.setItem(this._key, json);
+  /**
+   *
+   * @returns {Object<string, Object<string, *>>}
+   */
+  toObject() {
+    return this._data;
   }
 
-  restore() {
-    const json = window.localStorage.getItem(this._key) || '{}';
-    this._data = JSON.parse(json);
+  /**
+   *
+   * @param {Object<string, Object<string, *>>} value
+   */
+  fromObject(value) {
+    this._data = value;
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  toJSON() {
+    return JSON.stringify(this._data);
+  }
+
+  /**
+   *
+   * @param {string} value
+   */
+  fromJSON(value) {
+    this._data = JSON.parse(value);
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  toString() {
+    return this.toJSON();
   }
 }

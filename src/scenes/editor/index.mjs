@@ -121,7 +121,6 @@ export default class EditorScene extends SceneCoreModule {
   }
 
   load() {
-    this.storage.restore();
     this.board.load();
 
     this.waypoints = this.board.waypoints
@@ -137,7 +136,6 @@ export default class EditorScene extends SceneCoreModule {
 
   save() {
     this.board.save();
-    this.storage.dump();
   }
 
   /**
