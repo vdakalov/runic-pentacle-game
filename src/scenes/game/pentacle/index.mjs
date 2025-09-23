@@ -79,7 +79,8 @@ export default class PentacleScene extends SceneCoreModule {
      */
     this.cmm = undefined;
 
-    this._bootstrap();
+    this.game.loads
+      .then(this._initialize.bind(this));
   }
 
   /**
@@ -313,14 +314,6 @@ export default class PentacleScene extends SceneCoreModule {
     this._initializeRunes();
     this._initializeUfsEvents();
     this._initializePlayers();
-  }
-
-  _bootstrap() {
-    window
-      .fetch('/assets/storage.json')
-      .then(response => response.json())
-      .then(data => this.storage.fromObject(data))
-      .then(this._initialize.bind(this));
   }
 
   /**
