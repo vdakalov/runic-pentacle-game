@@ -1,5 +1,9 @@
-
-
+/**
+ * Context menu class
+ * Creates menu DOM and control it
+ * Warning: does not listen to contextmenu event
+ * only open and close methods available!
+ */
 export default class ContextMenu {
 
   /**
@@ -35,6 +39,13 @@ export default class ContextMenu {
     this._element = window.document.createElement('ul');
     this._element.className = this.constructor.name;
     this._element.addEventListener('click', this._onElementClick.bind(this));
+
+    /**
+     *
+     * @type {ContextMenuItem[]}
+     * @private
+     */
+    this._items = [];
 
     window.addEventListener('click', this.close = this.close.bind(this));
   }
@@ -81,13 +92,17 @@ export default class ContextMenu {
    * @param {MouseEvent} event
    */
   update(event) {
+    for (const item of this._items) {
+      item.detach();
+    }
+    this._items.length = 0;
     this._element.textContent = '';
     for (const item of this.builder(event)) {
       if (item.disabled) {
-        item.detach();
         continue;
       }
       item.attach(this._element, this);
+      this._items.push(item);
     }
   }
 
