@@ -1,6 +1,6 @@
-import { Cursor } from '../../../../utils.mjs';
+import { Cursor } from '../../../utils.mjs';
 import EditorMode from '../mode.mjs';
-import BoardWaypoint, { BoardWaypointSegment } from '../../../board/waypoint.mjs';
+import BoardWaypoint, { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 
 class EditorWaypointSelection {

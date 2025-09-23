@@ -1,4 +1,4 @@
-import SceneCoreModule from '../../../scene/index.mjs';
+import SceneCoreModule from '../../../core-modules/scene/index.mjs';
 
 
 export default class RegistrationScene extends SceneCoreModule {

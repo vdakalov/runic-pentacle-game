@@ -4,9 +4,8 @@ import CanvasCoreModule from './core-modules/canvas/index.mjs';
 import ResizeCanvasCoreModule from './core-modules/canvas/resize.mjs';
 import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
 import StorageCoreModule from './core-modules/storage.mjs';
-import MenuScene from './core-modules/scenes/menu.mjs';
-import EditorScene from './core-modules/scenes/editor/index.mjs';
-import PentacleScene from './core-modules/scenes/game/pentacle/index.mjs';
+import MenuScene from './scenes/menu.mjs';
+import { init } from './i18n.mjs';
 
 export default class Application {
   constructor() {
@@ -16,7 +15,14 @@ export default class Application {
      * @readonly
      * @private
      */
-    this.core = new Core([
+    this.core = new Core();
+
+    init()
+      .then(this._load.bind(this));
+  }
+
+  _load() {
+    this.core.load(
       // storage
       StorageCoreModule,
 
@@ -30,9 +36,7 @@ export default class Application {
 
       // Scenes
       MenuScene,
-      // EditorScene,
-      // PentacleScene,
-    ]);
+    );
 
     // start request animation frame system
     this.core

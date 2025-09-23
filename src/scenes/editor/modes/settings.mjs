@@ -1,5 +1,5 @@
 import EditorMode from '../mode.mjs';
-import { BoardWaypointSegment } from '../../../board/waypoint.mjs';
+import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 
 export default class SettingsMode extends EditorMode {

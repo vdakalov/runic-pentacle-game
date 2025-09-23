@@ -1,7 +1,7 @@
-import SceneObject from '../../../scene/object.mjs';
-import { BoardWaypointSegment } from '../../../board/waypoint.mjs';
+import SceneObject from '../../../core-modules/scene/object.mjs';
+import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import Player, { Phase } from '../player.mjs';
-import { Game } from '../../../../theme.mjs';
+import { Game } from '../../../theme.mjs';
 
 export default class PlayerObject extends SceneObject {
 

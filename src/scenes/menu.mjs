@@ -1,8 +1,9 @@
-import SceneCoreModule from '../scene/index.mjs';
-import ButtonSceneObject from '../scene/objects/button.mjs';
+import SceneCoreModule from '../core-modules/scene/index.mjs';
+import ButtonSceneObject from '../core-modules/scene/objects/button.mjs';
 import PentacleScene from './game/pentacle/index.mjs';
 import EditorScene from './editor/index.mjs';
-import { Assets } from '../../theme.mjs';
+import { Assets } from '../theme.mjs';
+import l from '../i18n.mjs';
 
 export default class MenuScene extends SceneCoreModule {
   constructor(core) {
@@ -21,7 +22,7 @@ export default class MenuScene extends SceneCoreModule {
      * @type {ButtonSceneObject}
      * @readonly
      */
-    this.btnGame = new ButtonSceneObject(0, 0, 'Game',
+    this.btnGame = new ButtonSceneObject(0, 0, l`Play`,
       this.changeScene.bind(this, PentacleScene));
     this.objects.push(this.btnGame);
 
@@ -30,7 +31,7 @@ export default class MenuScene extends SceneCoreModule {
      * @type {ButtonSceneObject}
      * @readonly
      */
-    this.btnEditor = new ButtonSceneObject(0, 0, 'Editor',
+    this.btnEditor = new ButtonSceneObject(0, 0, l`Editor`,
       this.changeScene.bind(this, EditorScene));
     this.objects.push(this.btnEditor);
   }

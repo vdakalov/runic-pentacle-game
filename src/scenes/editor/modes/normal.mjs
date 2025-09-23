@@ -1,5 +1,6 @@
 import EditorMode from '../mode.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
+import l from '../../../i18n.mjs';
 
 export default class NormalMode extends EditorMode {
   /**
@@ -12,8 +13,8 @@ export default class NormalMode extends EditorMode {
 
   contextMenuBuilder(bpe, ewp) {
     return [
-      new ActiveTextItem('Load', this.editor.load.bind(this.editor)),
-      new ActiveTextItem('Save', this.editor.save.bind(this.editor))
+      new ActiveTextItem(l`Load`, this.editor.load.bind(this.editor)),
+      new ActiveTextItem(l`Save`, this.editor.save.bind(this.editor))
     ];
   }
 }

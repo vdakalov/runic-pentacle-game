@@ -1,6 +1,6 @@
 import EditorMode from '../mode.mjs';
-import { Cursor } from '../../../../utils.mjs';
-import { EditorTheme } from '../../../../theme.mjs';
+import { Cursor } from '../../../utils.mjs';
+import { EditorTheme } from '../../../theme.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 
 export default class ConnectionsMode extends EditorMode {

@@ -1,9 +1,9 @@
-import SceneCoreModule from '../../scene/index.mjs';
-import ImageBoardCoreModule from '../../board/image.mjs';
-import BoardCoreModule from '../../board/index.mjs';
-import PointerBoardCoreModule from '../../board/pointer/index.js';
+import SceneCoreModule from '../../core-modules/scene/index.mjs';
+import ImageBoardCoreModule from '../../core-modules/board/image.mjs';
+import BoardCoreModule from '../../core-modules/board/index.mjs';
+import PointerBoardCoreModule from '../../core-modules/board/pointer/index.js';
 import MenuScene from '../menu.mjs';
-import StorageCoreModule from '../../storage.mjs';
+import StorageCoreModule from '../../core-modules/storage.mjs';
 import ContextMenuCtrl from '../../context-menu/ctrl.js';
 import ActiveTextItem from '../../context-menu/items/active-text.mjs';
 import SeparatorItem from '../../context-menu/items/separator.js';
@@ -13,9 +13,10 @@ import ConnectionsMode from './modes/connections.mjs';
 import SettingsMode from './modes/settings.mjs';
 import EditorWaypoint from './waypoint.mjs';
 import EditorWaypointsConnection from './waypoints-connection.mjs';
-import { EditorTheme } from '../../../theme.mjs';
-import { BoardWaypointSegment } from '../../board/waypoint.mjs';
-import { TAU } from '../../../utils.mjs';
+import { EditorTheme } from '../../theme.mjs';
+import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
+import { TAU } from '../../utils.mjs';
+import l from '../../i18n.mjs';
 
 export default class EditorScene extends SceneCoreModule {
 
@@ -156,17 +157,17 @@ export default class EditorScene extends SceneCoreModule {
 
     items.push(
       new SeparatorItem(items.length === 0),
-      new ActiveTextItem(`Mode: ${this._mode.constructor.name }`, () => {
+      new ActiveTextItem(l`Mode: ${this._mode.constructor.name}`, () => {
         this._modeSelection = !this._modeSelection;
         return true;
       }, false, event),
-      ...this._modes.map(mode => new ActiveTextItem(mode.constructor.name,
+      ...this._modes.map(mode => new ActiveTextItem(l`${mode.constructor.name}`,
         mode === this._mode ? undefined : this.selectMode.bind(this, mode),
         !this._modeSelection, event)),
       new SeparatorItem(!this._modeSelection)
     );
 
-    items.push(new ActiveTextItem('Close Editor', this.changeScene.bind(this, MenuScene)));
+    items.push(new ActiveTextItem(l`Menu`, this.changeScene.bind(this, MenuScene)));
     return items;
   }
 

@@ -1,10 +1,10 @@
-import SceneCoreModule from '../../../scene/index.mjs';
-import StorageCoreModule from '../../../storage.mjs';
-import BoardCoreModule from '../../../board/index.mjs';
-import ImageBoardCoreModule from '../../../board/image.mjs';
-import PointerBoardCoreModule from '../../../board/pointer/index.js';
+import SceneCoreModule from '../../../core-modules/scene/index.mjs';
+import StorageCoreModule from '../../../core-modules/storage.mjs';
+import BoardCoreModule from '../../../core-modules/board/index.mjs';
+import ImageBoardCoreModule from '../../../core-modules/board/image.mjs';
+import PointerBoardCoreModule from '../../../core-modules/board/pointer/index.js';
 import GameCoreModule from '../index.mjs';
-import { BoardWaypointSegment } from '../../../board/waypoint.mjs';
+import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ContextMenuCtrl from '../../../context-menu/ctrl.js';
 import SeparatorItem from '../../../context-menu/items/separator.js';
 import TextItem from '../../../context-menu/items/text.mjs';
@@ -15,6 +15,7 @@ import UfsEvent from './ufs-event.mjs';
 import Player, { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
 import MenuScene from '../../menu.mjs';
+import l from '../../../i18n.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
   constructor(core) {
@@ -98,14 +99,14 @@ export default class PentacleScene extends SceneCoreModule {
       const po = this.cmm;
       items.push(
         new SeparatorItem(items.length === 0),
-        new ActiveTextItem(`Player ${po.segmentName}`,
+        new ActiveTextItem(l`Player ${po.segmentName}`,
           this._cmSelectPlayer.bind(this, undefined), false, event),
-        new ActiveTextItem('Turn', this._cmPlayerTurn.bind(this, po), false, event),
-        new ActiveTextItem('Stats', this._cmPlayerStats.bind(this, po)),
+        new ActiveTextItem(l`Turn`, this._cmPlayerTurn.bind(this, po), false, event),
+        new ActiveTextItem(l`Stats`, this._cmPlayerStats.bind(this, po)),
       );
     } else {
       for (const player of this.players) {
-        const item = new ActiveTextItem(`Player ${player.segmentName}`,
+        const item = new ActiveTextItem(l`Player ${player.segmentName}`,
           this._cmSelectPlayer.bind(this, player), false, event);
         items.push(item);
       }
@@ -113,8 +114,8 @@ export default class PentacleScene extends SceneCoreModule {
 
     items.push(
       new SeparatorItem(items.length === 0),
-      new ActiveTextItem('Reset board', this._cmReset.bind(this)),
-      new ActiveTextItem('Menu', this.changeScene.bind(this, MenuScene))
+      new ActiveTextItem(l`Reset`, this._cmReset.bind(this)),
+      new ActiveTextItem(l`Menu`, this.changeScene.bind(this, MenuScene))
     );
 
     return items;
@@ -197,11 +198,11 @@ export default class PentacleScene extends SceneCoreModule {
    */
   _cmPlayerStats(player) {
     const lines = [
-      'Player',
-      ` - Segment: ${player.segmentName}`,
+      l`Player`,
+      ' - ' + l`Segment: ${player.segmentName}`,
     ];
 
-    lines.push(' - Stones:');
+    lines.push(` - ${l`Stones`}:`);
     const stones = player.game.stones
       .reduce((acc, stone) => {
         if (!acc.hasOwnProperty(stone.kindName)) {
@@ -211,7 +212,7 @@ export default class PentacleScene extends SceneCoreModule {
         return acc;
       }, {});
     for (const [kindName, count] of Object.entries(stones)) {
-      lines.push(`    - ${kindName}: ${count}`);
+      lines.push(`    - ${l`${kindName}`}: ${count}`);
     }
 
     const text = lines.join('\n');

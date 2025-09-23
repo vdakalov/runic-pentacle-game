@@ -1,5 +1,5 @@
-import CoreModule from '../../../core-module.mjs';
-import { BoardWaypointSegment } from '../../board/waypoint.mjs';
+import CoreModule from '../../core-module.mjs';
+import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
 import Player, { Phase } from './player.mjs';
 
 export default class GameCoreModule extends CoreModule {

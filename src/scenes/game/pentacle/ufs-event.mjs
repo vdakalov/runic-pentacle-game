@@ -1,6 +1,6 @@
-import SceneObject from '../../../scene/object.mjs';
-import { Game } from '../../../../theme.mjs';
-import { TAU } from '../../../../utils.mjs';
+import SceneObject from '../../../core-modules/scene/object.mjs';
+import { Game } from '../../../theme.mjs';
+import { TAU } from '../../../utils.mjs';
 
 /**
  * Unforeseen event

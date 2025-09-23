@@ -1,5 +1,5 @@
-import { getPointBetween } from '../../../utils.mjs';
-import { EditorTheme } from '../../../theme.mjs';
+import { getPointBetween } from '../../utils.mjs';
+import { EditorTheme } from '../../theme.mjs';
 
 export default class EditorWaypointsConnection {
 

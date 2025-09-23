@@ -1,4 +1,4 @@
-import { getObjectPrototypes } from '../../utils.mjs';
+import { getObjectPrototypes } from '../utils.mjs';
 
 /**
  * @abstract

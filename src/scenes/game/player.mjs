@@ -1,4 +1,4 @@
-import { createEnum } from '../../../utils.mjs';
+import { createEnum } from '../../utils.mjs';
 import Rune from './pentacle/rune.mjs';
 
 export const Phase = createEnum({

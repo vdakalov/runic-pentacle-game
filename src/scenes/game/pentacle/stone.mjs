@@ -1,6 +1,6 @@
-import SceneObject from '../../../scene/object.mjs';
-import { createEnum, TAU } from '../../../../utils.mjs';
-import { Game } from '../../../../theme.mjs';
+import SceneObject from '../../../core-modules/scene/object.mjs';
+import { createEnum, TAU } from '../../../utils.mjs';
+import { Game } from '../../../theme.mjs';
 
 /**
  *

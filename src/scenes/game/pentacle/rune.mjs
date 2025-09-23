@@ -1,7 +1,7 @@
-import SceneObject from '../../../scene/object.mjs';
-import { BoardWaypointSegment } from '../../../board/waypoint.mjs';
-import { TAU } from '../../../../utils.mjs';
-import { Game } from '../../../../theme.mjs';
+import SceneObject from '../../../core-modules/scene/object.mjs';
+import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
+import { TAU } from '../../../utils.mjs';
+import { Game } from '../../../theme.mjs';
 
 const elSeg = TAU / 5;
 const segmentRotationMap = {

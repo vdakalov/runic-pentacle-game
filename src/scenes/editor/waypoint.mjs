@@ -1,6 +1,6 @@
-import { BoardWaypointSegment } from '../../board/waypoint.mjs';
-import { DOMRectInclude } from '../../../utils.mjs';
-import { EditorTheme } from '../../../theme.mjs';
+import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
+import { DOMRectInclude } from '../../utils.mjs';
+import { EditorTheme } from '../../theme.mjs';
 
 export default class EditorWaypoint {
 
