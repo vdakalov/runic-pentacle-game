@@ -9,6 +9,11 @@ export default class StorageCoreModule extends CoreModule {
      * @private
      */
     this._data = {};
+
+    this.coreModulePromise = window
+      .fetch('/assets/storage.json')
+      .then(response => response.json())
+      .then(data => this.fromObject(data));
   }
 
   /**

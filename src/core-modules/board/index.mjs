@@ -38,6 +38,8 @@ export default class BoardCoreModule extends CoreModule {
      * @type {BoardWaypoint[]}
      */
     this.startings = [];
+
+    this.load();
   }
 
   destroy() {

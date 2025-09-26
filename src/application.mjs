@@ -5,6 +5,8 @@ import ResizeCanvasCoreModule from './core-modules/canvas/resize.mjs';
 import MountCanvasCoreModule from './core-modules/canvas/mount.mjs';
 import StorageCoreModule from './core-modules/storage.mjs';
 import MenuScene from './scenes/menu.mjs';
+import PentacleScene from './scenes/game/pentacle/index.mjs';
+import EditorScene from './scenes/editor/index.mjs';
 import { init } from './i18n.mjs';
 
 export default class Application {
@@ -35,12 +37,15 @@ export default class Application {
       MountCanvasCoreModule,
 
       // Scenes
-      MenuScene,
-    );
-
-    // start request animation frame system
-    this.core
-      .get(RafCoreModule)
-      .resume();
+      // MenuScene,
+      PentacleScene,
+      // EditorScene,
+    )
+      .then(() => {
+        // start request animation frame system
+        this.core
+          .get(RafCoreModule)
+          .resume();
+      });
   }
 }

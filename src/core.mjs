@@ -19,6 +19,18 @@ export default class Core {
 
   /**
    *
+   * @param {string} name
+   * @private
+   */
+  _loaded(name) {
+    console.debug(`%cCore%c: CoreModule loaded: %c${name}`,
+      'color:darkmagenta; text-decoration: underline',
+      'color:gray; text-decoration: none',
+      'font-weight: bold');
+  }
+
+  /**
+   *
    * @template T
    * @param {typeof T} type
    * @return {T}
@@ -34,20 +46,42 @@ export default class Core {
   /**
    * @template T
    * @param {...(typeof CoreModule)[]} types
+   * @returns {Promise<void>}
    */
   load(...types) {
-    for (const type of types) {
+    /**
+     *
+     * @type {Promise<void>[]}
+     */
+    const promises = [];
+    for (let index = 0; index < types.length; index++) {
+      /**
+       *
+       * @type {typeof CoreModule}
+       */
+      const type = types[index];
       if (this.modules.hasOwnProperty(type.name)) {
         throw new Error(`Core: Unable to load CoreModule "${type.name}": already loaded`);
       }
-      this.modules[type.name] = {
-        type, instance: new type(this)
-      };
-      console.debug(`%cCore%c: CoreModule loaded: %c${type.name}`,
-        'color:darkmagenta; text-decoration: underline',
-        'color:gray; text-decoration: none',
-        'font-weight: bold');
+      /**
+       * @type {CoreModule}
+       */
+      const instance = new type(this);
+      this.modules[type.name] = { type, instance };
+      if (instance.coreModulePromise !== undefined) {
+        promises[promises.length] = instance.coreModulePromise
+          .then(() => {
+            this._loaded(type.name);
+            const rest = types.slice(index + 1, types.length);
+            if (rest.length !== 0) {
+              return this.load(...rest);
+            }
+          });
+        break;
+      }
+      this._loaded(type.name);
     }
+    return Promise.all(promises);
   }
 
   /**

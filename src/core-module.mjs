@@ -15,5 +15,10 @@ export default class CoreModule {
      * @readonly
      */
     this.core = core;
+    /**
+     * Define it if module is async
+     * @type {Promise<void>|undefined}
+     */
+    this.coreModulePromise = undefined;
   }
 }

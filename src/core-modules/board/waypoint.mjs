@@ -109,6 +109,12 @@ export default class BoardWaypoint {
    */
   constructor(segment, rx, ry) {
     /**
+     *
+     * @type {number}
+     * @readonly
+     */
+    this.id = Number.parseInt(rx.toFixed(6).slice(2, 6));
+    /**
      * Segment waypoint belongs
      * @type {BoardWaypointSegment}
      */
@@ -145,5 +151,13 @@ export default class BoardWaypoint {
    */
   toObject() {
     return [this.segment, this.rx, this.ry];
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  toString() {
+    return `${this.constructor.name}#${this.id}(${this.segmentName})`;
   }
 }

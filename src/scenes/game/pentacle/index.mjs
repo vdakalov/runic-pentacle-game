@@ -1,5 +1,4 @@
 import SceneCoreModule from '../../../core-modules/scene/index.mjs';
-import StorageCoreModule from '../../../core-modules/storage.mjs';
 import BoardCoreModule from '../../../core-modules/board/index.mjs';
 import ImageBoardCoreModule from '../../../core-modules/board/image.mjs';
 import PointerBoardCoreModule from '../../../core-modules/board/pointer/index.js';
@@ -7,12 +6,11 @@ import GameCoreModule from '../index.mjs';
 import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ContextMenuCtrl from '../../../context-menu/ctrl.js';
 import SeparatorItem from '../../../context-menu/items/separator.js';
-import TextItem from '../../../context-menu/items/text.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 import Stone, { StoneKind } from './stone.mjs';
 import Rune from './rune.mjs';
 import UfsEvent from './ufs-event.mjs';
-import Player, { Phase } from '../player.mjs';
+import { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
 import MenuScene from '../../menu.mjs';
 import l from '../../../i18n.mjs';
@@ -37,14 +35,8 @@ export default class PentacleScene extends SceneCoreModule {
       BoardCoreModule,
       ImageBoardCoreModule,
       PointerBoardCoreModule,
-      GameCoreModule,
-    );
+      GameCoreModule);
 
-    /**
-     *
-     * @type {StorageCoreModule}
-     */
-    this.storage = this.core.get(StorageCoreModule);
     /**
      *
      * @type {BoardCoreModule}
@@ -79,8 +71,7 @@ export default class PentacleScene extends SceneCoreModule {
      */
     this.cmm = undefined;
 
-    this.game.loads
-      .then(this._initialize.bind(this));
+    this._initialize();
   }
 
   /**
@@ -308,7 +299,6 @@ export default class PentacleScene extends SceneCoreModule {
    * Initialize game field
    */
   _initialize() {
-    this.board.load();
     this.objects.length = 0;
     this._initializeStones();
     this._initializeRunes();
@@ -358,4 +348,17 @@ export default class PentacleScene extends SceneCoreModule {
     );
     super.destroy();
   }
+
+  // draw() {
+  //   super.draw();
+  //   for (const wp of this.board.waypoints) {
+  //     if (wp.atElement) {
+  //       const [ax, ay] = this.image.r2a(wp.rx, wp.ry);
+  //       this.canvas.c.fillStyle = 'orange';
+  //       this.canvas.c.font = 'bold 24px sans-serif';
+  //       this.canvas.c.textAlign = 'center';
+  //       this.canvas.c.fillText(wp.id.toString(), ax, ay + 4)
+  //     }
+  //   }
+  // }
 }

@@ -1,19 +1,13 @@
 import CoreModule from '../../core-module.mjs';
 import BoardCoreModule from '../../core-modules/board/index.mjs';
-import { BoardWaypointSegment, SegmentsSets } from '../../core-modules/board/waypoint.mjs';
+import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
 import Player, { Phase } from './player.mjs';
+import Link from './link.mjs';
 import l from '../../i18n.mjs';
-import StorageCoreModule from '../../core-modules/storage.mjs';
 
 export default class GameCoreModule extends CoreModule {
   constructor(core) {
     super(core);
-
-    /**
-     *
-     * @type {StorageCoreModule}
-     */
-    this.storage = this.core.get(StorageCoreModule);
 
     /**
      *
@@ -40,65 +34,99 @@ export default class GameCoreModule extends CoreModule {
      *
      * @type {BoardWaypoint[]}
      */
-    this.lines = [];
+    this.links = [];
 
-    /**
-     *
-     * @type {Promise<void>}
-     * @readonly
-     */
-    this.loads = this._bootstrap();
-  }
-
-  /**
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  _bootstrap() {
-    return window
-      .fetch('/assets/storage.json')
-      .then(response => response.json())
-      .then(data => this.storage.fromObject(data))
-      .then(this._initialize.bind(this));
+    this._initialize();
   }
 
   _initialize() {
-    this.board.load();
-    if (this.board.waypoints.length === 0) {
+    // try to find any wp at element segment
+    /**
+     *
+     * @type {BoardWaypoint}
+     */
+    let element = this.board.waypoints
+      .find(bwp => bwp.atElement);
+    // exit, if there is not any wp at element segment
+    if (element === undefined) {
       return;
     }
-    const wp = this.board.waypoints
-      .find(bwp => bwp.atElement);
-    this.lines.push(wp);
-    const segments = [
-      BoardWaypointSegment.Event,
-      BoardWaypointSegment.Element,
-      ...SegmentsSets.Lines,
-    ];
-    let segment = wp.segment;
-    for (let index = 0; index < this.lines.length; index++) {
-      const wp = this.lines[index];
+    /**
+     *
+     * @type {BoardWaypointSegment}
+     */
+    let segment = undefined;
+    /**
+     *
+     * @type {Link[]}
+     */
+    const links = this.links = [];
+    /**
+     *
+     * @type {BoardWaypoint[]}
+     */
+    const stack = [element];
+    // iterate over all pentacle's lines/events/elements
+    // and stack wp on each step
+    for (let index = 0; index < stack.length; index++) {
+      const wp = stack[index];
+      stack:
       for (const bwc of wp.connections) {
         const awp = bwc.getAnotherWaypoint(wp);
-        if (awp.atLine) {
-          if (awp.segment === segment && this.lines.indexOf(awp) === -1) {
-            this.lines.push(awp);
+        switch (wp.segment) {
+          case BoardWaypointSegment.Element: {
+            if (awp.atLine && awp.segment !== segment && stack.indexOf(awp) === -1) {
+              element = wp;
+              segment = awp.segment;
+              stack.push(awp);
+              links.push(new Link(wp, awp, undefined, element, segment));
+              break stack;
+            }
+            break;
           }
-        } else if (awp.atEvent) {
-
-        }
-
-        const atCond = awp.at(...segments);
-        const indexCond = this.lines.indexOf(awp) === -1;
-        console.log('LINES', { atCond, indexCond, wp, awp });
-        if (atCond && indexCond) {
-          this.lines.push(awp);
-          break;
+          case segment: {
+            const pass = (awp.segment === BoardWaypointSegment.Event && awp !== stack[index - 1])
+              || (awp.segment === BoardWaypointSegment.Element && stack.indexOf(awp) === -1)
+              || (awp.segment === segment && stack.indexOf(awp) === -1);
+            if (pass) {
+              stack.push(awp);
+              links.push(new Link(wp, awp, undefined, element, segment));
+              break stack;
+            }
+            break;
+          }
+          case BoardWaypointSegment.Event: {
+            if (awp.segment === segment && stack.indexOf(awp) === -1) {
+              stack.push(awp);
+              links.push(new Link(wp, awp, undefined, element, segment));
+              break stack;
+            }
+            break;
+          }
         }
       }
     }
-    console.log('GameCoreModule: load', this.lines);
+
+    // close first and last waypoints in link
+    links.push(new Link(
+      stack[stack.length - 1],
+      stack[0], undefined,
+      links[links.length - 1].bElWp,
+      links[links.length - 1].lineSegment));
+
+    // define forward element for every links
+    element = stack[0];
+    for (let index = links.length - 1; index >= 0; index--) {
+      const link = links[index];
+      link.fElWp = element;
+      if (link.aWp.atElement) {
+        element = link.aWp;
+      }
+    }
+
+    // for (const link of links) {
+    //   console.log(link.toString());
+    // }
   }
 
   destroy() {

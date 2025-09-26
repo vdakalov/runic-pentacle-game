@@ -59,6 +59,11 @@ export default class Rune extends SceneObject {
     c.fillRect(-w/2, -h/2, w, h);
     c.closePath();
 
+    // c.textAlign = 'center';
+    // c.fillStyle = 'black';
+    // c.font = '14px sans-serif';
+    // c.fillText(this.wp.id.toString(), 0, 4);
+
     c.restore();
 
   }

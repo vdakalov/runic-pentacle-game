@@ -34,5 +34,10 @@ export default class UfsEvent extends SceneObject {
     c.arc(ax, ay, s, 0, TAU);
     c.fill();
     c.closePath();
+
+    // c.textAlign = 'center';
+    // c.fillStyle = 'black';
+    // c.font = '14px sans-serif';
+    // c.fillText(this.wp.id.toString(), ax, ay + 4);
   }
 }

@@ -121,8 +121,6 @@ export default class EditorScene extends SceneCoreModule {
   }
 
   load() {
-    this.board.load();
-
     this.waypoints = this.board.waypoints
       .map(bwp => new EditorWaypoint(bwp));
 
