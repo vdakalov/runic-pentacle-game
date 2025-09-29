@@ -78,7 +78,7 @@ export function DOMRectInclude(rect, x, y) {
  * @param {number} bx
  * @param {number} by
  * @param {number} distance Distance between points (0-1)
- * @returns {[x: number, y: number, a: number]}
+ * @returns {[x: number, y: number, at: number]}
  */
 export function getPointBetween(ax, ay, bx, by, distance) {
   const a = Math.atan2(ay - by, ax - bx);

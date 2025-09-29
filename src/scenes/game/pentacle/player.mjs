@@ -1,6 +1,6 @@
 import SceneObject from '../../../core-modules/scene/object.mjs';
 import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
-import Player, { Phase } from '../player.mjs';
+import { Phase } from '../player.mjs';
 import { Game } from '../../../theme.mjs';
 
 export default class PlayerObject extends SceneObject {
@@ -80,8 +80,13 @@ export default class PlayerObject extends SceneObject {
      */
     this.wp = wp;
     /**
+     *
+     * @type {LinkCursor|undefined}
+     */
+    this.linkCursor = undefined;
+    /**
      * Relative waypoint position
-     * @type {[rx: number, ry: number, a: number]}
+     * @type {[rx: number, ry: number, at: number]}
      * @private
      */
     this.position = [];
@@ -90,11 +95,6 @@ export default class PlayerObject extends SceneObject {
      * @type {ImageBoardCoreModule}
      */
     this.image = image;
-    /**
-     *
-     * @type {number}
-     */
-    this.direction = 0;
 
     this._defineWaypointPosition();
   }

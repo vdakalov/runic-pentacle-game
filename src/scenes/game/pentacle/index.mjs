@@ -14,6 +14,8 @@ import { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
 import MenuScene from '../../menu.mjs';
 import l from '../../../i18n.mjs';
+import Cursor from '../link-cursor.mjs';
+import LinkCursor from '../link-cursor.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
   constructor(core) {
@@ -70,6 +72,13 @@ export default class PentacleScene extends SceneCoreModule {
      * @type {*}
      */
     this.cmm = undefined;
+
+    /**
+     *
+     * @type {string}
+     * @private
+     */
+    this._lastDicePromptValue = '';
 
     this._initialize();
   }
@@ -133,51 +142,9 @@ export default class PentacleScene extends SceneCoreModule {
    * @private
    */
   _cmPlayerTurn(player) {
-    const dice = this.game.promptDice();
-
-    switch (player.phase) {
-      case Phase.Initial:
-      case Phase.RingMoving: {
-        if (player.wp.atElement && !player.isPhaseInitial) {
-          const msg = l`Do you wish moving over pentacle lines?`;
-          if (window.confirm(msg)) {
-            /**
-             *
-             * @type {BoardWaypointsConnection[]}
-             */
-            const lines = player.wp.connections
-              .filter(bwc => bwc.getAnotherWaypoint(player.wp).atLine);
-            const options = lines.map((bwc, index) =>
-              `${index + 1} - ${l(bwc.getAnotherWaypoint(player.wp).segmentName)}`);
-            const raw = window.prompt(`${l('Which one')}:\n${options.join('\n')}`) || '';
-            const number = Number.parseInt(raw.trim());
-            if (Number.isInteger(number)) {
-              const wp = lines[number - 1].getAnotherWaypoint(player.wp);
-              if (wp !== undefined) {
-                player.direction = wp.rx - player.wp.rx;
-                player.setPhase(Phase.LinesMoving, wp.segment);
-                const fwp = dice === 1 ? wp :
-                  this.game.getTurnWaypoint(player.game, player.wp, dice, player.direction);
-                player.setWaypoint(fwp);
-                this._pickupRune(player.game, fwp);
-                break;
-              }
-            }
-          }
-        }
-        const wp = this.game.getTurnWaypoint(player.game, player.wp, dice);
-        player.setWaypoint(wp);
-        player.setPhase(Phase.RingMoving);
-        this._pickupStone(player.game, wp);
-        break;
-      }
-      case Phase.LinesMoving: {
-        const wp = this.game.getTurnWaypoint(player.game, player.wp, dice, player.direction);
-        player.setWaypoint(wp);
-        this._pickupRune(player.game, wp);
-        break;
-      }
-    }
+    const dice = this._promptDice();
+    this._move(player, dice);
+    this._collect(player);
   }
 
   /**
@@ -207,6 +174,8 @@ export default class PentacleScene extends SceneCoreModule {
 
     // runes
     lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.kind)}`);
+
+    lines.push(` - ${l`Events`}: ${player.game.events.map(event => event.wp.id)}`);
 
     const text = lines.join('\n');
     window.alert(text);
@@ -307,33 +276,118 @@ export default class PentacleScene extends SceneCoreModule {
   }
 
   /**
+   * Ask user for dice value and return it or returns random dice-value
+   * @returns {number}
+   */
+  _promptDice() {
+    const msg = l`Dice value` + ' [1-6] (' + l`cancel to random` + '):';
+    const raw = this._lastDicePromptValue = window
+      .prompt(msg, this._lastDicePromptValue) || '';
+    const int = Number.parseInt(raw.trim());
+    if (Number.isInteger(int) && int > 0 && 6 >= int) {
+      return int;
+    }
+    const value = this.game.dice();
+    window.alert(l`Dice value: ${value}`);
+    return value;
+  }
+
+  /**
    *
-   * @param {Player} player
-   * @param {BoardWaypoint} wp
+   * @param {PlayerObject} player
+   * @param {number} dice
    * @private
    */
-  _pickupStone(player, wp) {
-    for (let index = 0; index < this.objects.length; index++) {
-      const object = this.objects[index];
-      if (object instanceof Stone && object.wp === wp) {
-        player.stones.push(object);
-        this.objects.splice(index, 1);
+  _move(player, dice) {
+    switch (player.phase) {
+      case Phase.Initial:
+        this._ringMove(player, dice);
+        player.setPhase(Phase.RingMoving);
+        return;
+      case Phase.RingMoving:
+        if (player.wp.atElement) {
+          this._initLineMoving(player, dice);
+          if (player.linkCursor !== undefined) {
+            break;
+          }
+        }
+        return this._ringMove(player, dice);
+      case Phase.LinesMoving:
+        return this._lineMove(player, dice);
+    }
+  }
+
+  /**
+   *
+   * @param {PlayerObject} player
+   * @param {number} dice
+   * @private
+   */
+  _ringMove(player, dice) {
+    let wp = player.wp;
+    while (dice-->0) {
+      wp = this.game.getRingMoveOption(wp, player.segment);
+    }
+    player.setWaypoint(wp);
+  }
+
+  /**
+   *
+   * @param {PlayerObject} player
+   * @param {number} dice
+   * @private
+   */
+  _initLineMoving(player, dice) {
+    const links = this.game.getElementMoveOptions(player);
+    let message = l`Which way are you wish?`;
+    links.forEach((link, index) =>
+      message += `\n  ${index + 1} - ${link.lineSegmentName}`);
+    const wayRaw = window.prompt(message) || '';
+    const wayNumber = Number.parseInt(wayRaw.trim());
+    if (Number.isInteger(wayNumber)) {
+      const link = links[wayNumber - 1];
+      if (link !== undefined) {
+        player.setPhase(Phase.LinesMoving, link.lineSegment);
+        player.linkCursor = new LinkCursor(link, player.wp);
+        this._lineMove(player, dice);
       }
     }
   }
 
   /**
    *
-   * @param {Player} player
-   * @param {BoardWaypoint} wp
+   * @param {PlayerObject} player
+   * @param {number} dice
    * @private
    */
-  _pickupRune(player, wp) {
+  _lineMove(player, dice) {
+    while (dice-->0) {
+      player.linkCursor.next();
+    }
+    player.setWaypoint(player.linkCursor.wp);
+  }
+
+  /**
+   *
+   * @param {PlayerObject} player
+   * @private
+   */
+  _collect(player) {
     for (let index = 0; index < this.objects.length; index++) {
       const object = this.objects[index];
-      if (object instanceof Rune && object.wp === wp) {
-        player.runes.push(object);
+      let bag = undefined;
+      switch (true) {
+        case object instanceof Stone && player.wp === object.wp:
+          bag = player.game.stones; break;
+        case object instanceof Rune && player.wp === object.wp:
+          bag = player.game.runes; break;
+        case object instanceof UfsEvent && player.wp === object.wp:
+          bag = player.game.events; break;
+      }
+      if (bag !== undefined) {
+        bag.push(object);
         this.objects.splice(index, 1);
+        break;
       }
     }
   }

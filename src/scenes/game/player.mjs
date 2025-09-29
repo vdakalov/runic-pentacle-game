@@ -1,9 +1,17 @@
 import { createEnum } from '../../utils.mjs';
-import Rune from './pentacle/rune.mjs';
 
 export const Phase = createEnum({
+  /**
+   * Player does not make first turn
+   */
   Initial: 0,
+  /**
+   * Player moves on its ring
+   */
   RingMoving: 1,
+  /**
+   * Player moves on pentacle lines
+   */
   LinesMoving: 2,
 });
 
@@ -40,14 +48,19 @@ export default class Player {
      */
     this.phase = Phase.Initial;
     /**
-     *
+     * Collected stones
      * @type {Stone[]}
      */
     this.stones = [];
     /**
-     *
+     * Collected runes
      * @type {Rune[]}
      */
     this.runes = [];
+    /**
+     *
+     * @type {UfsEvent[]}
+     */
+    this.events = [];
   }
 }

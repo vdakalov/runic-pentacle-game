@@ -44,7 +44,7 @@ export default class BoardWaypointsConnection {
    * @param {BoardWaypoint} wp
    * @returns {boolean}
    */
-  hasWaypoint(wp) {
+  has(wp) {
     return this.from === wp || this.to === wp;
   }
 
@@ -53,9 +53,11 @@ export default class BoardWaypointsConnection {
    * @param {BoardWaypoint} wp
    * @returns {BoardWaypoint}
    */
-  getAnotherWaypoint(wp) {
-    const wps = [this.from, this.to];
-    const index = wps.indexOf(wp);
-    return wps[(index + 1) % wps.length];
+  another(wp) {
+    switch (wp) {
+      case this.from: return this.to;
+      case this.to: return this.from;
+      default: throw new Error(`${this.constructor}: There is no waypoint in connection: ${wp}`);
+    }
   }
 }

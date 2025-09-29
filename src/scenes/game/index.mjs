@@ -4,6 +4,7 @@ import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
 import Player, { Phase } from './player.mjs';
 import Link from './link.mjs';
 import l from '../../i18n.mjs';
+import LinkCursor from './link-cursor.mjs';
 
 export default class GameCoreModule extends CoreModule {
   constructor(core) {
@@ -25,14 +26,7 @@ export default class GameCoreModule extends CoreModule {
 
     /**
      *
-     * @type {string}
-     * @private
-     */
-    this._lastDicePromptValue = '';
-
-    /**
-     *
-     * @type {BoardWaypoint[]}
+     * @type {Link[]}
      */
     this.links = [];
 
@@ -58,6 +52,11 @@ export default class GameCoreModule extends CoreModule {
     let segment = undefined;
     /**
      *
+     * @type {Link|undefined}
+     */
+    let link = undefined;
+    /**
+     *
      * @type {Link[]}
      */
     const links = this.links = [];
@@ -70,16 +69,26 @@ export default class GameCoreModule extends CoreModule {
     // and stack wp on each step
     for (let index = 0; index < stack.length; index++) {
       const wp = stack[index];
+      if (links.length > 1) {
+        links[links.length - 2].b = links[links.length - 1];
+      }
       stack:
       for (const bwc of wp.connections) {
-        const awp = bwc.getAnotherWaypoint(wp);
+        const awp = bwc.another(wp);
         switch (wp.segment) {
           case BoardWaypointSegment.Element: {
             if (awp.atLine && awp.segment !== segment && stack.indexOf(awp) === -1) {
               element = wp;
               segment = awp.segment;
               stack.push(awp);
-              links.push(new Link(wp, awp, undefined, element, segment));
+              links.push(new Link(
+                links.length,
+                element,
+                undefined,
+                wp, awp,
+                segment,
+                links[links.length - 1],
+                undefined));
               break stack;
             }
             break;
@@ -90,7 +99,13 @@ export default class GameCoreModule extends CoreModule {
               || (awp.segment === segment && stack.indexOf(awp) === -1);
             if (pass) {
               stack.push(awp);
-              links.push(new Link(wp, awp, undefined, element, segment));
+              links.push(new Link(
+                links.length,
+                element, undefined,
+                wp, awp,
+                segment,
+                links[links.length - 1],
+                undefined));
               break stack;
             }
             break;
@@ -98,7 +113,13 @@ export default class GameCoreModule extends CoreModule {
           case BoardWaypointSegment.Event: {
             if (awp.segment === segment && stack.indexOf(awp) === -1) {
               stack.push(awp);
-              links.push(new Link(wp, awp, undefined, element, segment));
+              links.push(new Link(
+                links.length,
+                element, undefined,
+                wp, awp,
+                segment,
+                links[links.length - 1],
+                undefined));
               break stack;
             }
             break;
@@ -109,24 +130,29 @@ export default class GameCoreModule extends CoreModule {
 
     // close first and last waypoints in link
     links.push(new Link(
-      stack[stack.length - 1],
-      stack[0], undefined,
-      links[links.length - 1].bElWp,
-      links[links.length - 1].lineSegment));
+      links.length,
+      element, // A target
+      stack[0], // B target
+      stack[stack.length - 1], // A leader
+      stack[0], // B leader
+      links[links.length - 1].lineSegment,
+      links[links.length - 1], links[0]
+    ));
+    links[0].a = links[links.length - 2].b = links[links.length - 1];
+
 
     // define forward element for every links
     element = stack[0];
     for (let index = links.length - 1; index >= 0; index--) {
       const link = links[index];
-      link.fElWp = element;
-      if (link.aWp.atElement) {
-        element = link.aWp;
+      link.bt = element;
+      if (link.at.atElement && link.at === link.al) {
+        element = link.at;
       }
     }
 
-    // for (const link of links) {
-    //   console.log(link.toString());
-    // }
+    // debug
+    links.forEach(l => console.log(l.toString()));
   }
 
   destroy() {
@@ -144,65 +170,24 @@ export default class GameCoreModule extends CoreModule {
   }
 
   /**
-   * Ask user for dice value and return it or returns random dice-value
-   * @returns {number}
+   *
+   * @param {BoardWaypoint} wp
+   * @param {BoardWaypointSegment} segment
+   * @returns {BoardWaypoint}
    */
-  promptDice() {
-    const msg = l`Dice value` + ' [1-6] (' + l`cancel to random` + '):';
-    const raw = this._lastDicePromptValue = window
-      .prompt(msg, this._lastDicePromptValue) || '';
-    const int = Number.parseInt(raw.trim());
-    if (Number.isInteger(int) && int > 0 && 6 >= int) {
-      return int;
-    }
-    const value = this.dice();
-    window.alert(l`Dice value: ${value}`);
-    return value;
-  }
-
-  /**
-   * Check if waypoint is on the direction way
-   * @param {BoardWaypoint} from
-   * @param {BoardWaypoint} to
-   * @param {number} direction
-   * @returns {boolean}
-   */
-  onPlayerWay(from, to, direction) {
-    const dir = to.rx - from.rx;
-    return direction !== 0
-      && ((direction > 0 && dir > 0) || (0 > direction && 0 > dir));
+  getRingMoveOption(wp, segment) {
+    return wp.connections
+      .find(wpc => wpc.directed && wpc.from === wp && wpc.to
+        .at(segment, BoardWaypointSegment.Element)).to;
   }
 
   /**
    *
-   * @param {Player} player Turn's player
-   * @param {BoardWaypoint} wp Init waypoint
-   * @param {number} dice Dice value
-   * @param {number} [direction]
-   * @returns {BoardWaypoint} Target turn waypoint
+   * @param {PlayerObject} player
+   * @returns {Link[]}
    */
-  getTurnWaypoint(player, wp, dice, direction = 0) {
-    switch (player.phase) {
-      case Phase.Initial:
-      case Phase.RingMoving:
-        while (dice-- > 0) {
-          wp = wp.connections
-            .find(wpc => wpc.directed && wpc.from === wp && wpc.to
-              .at(player.segment, BoardWaypointSegment.Element)).to;
-        }
-        break;
-      case Phase.LinesMoving:
-        while (dice-- > 0) {
-          for (const wpc of wp.connections) {
-            const awp = wpc.getAnotherWaypoint(wp);
-            if (awp.at(player.segment) && this.onPlayerWay(wp, awp, direction)) {
-              wp = awp;
-              break;
-            }
-          }
-        }
-        break;
-    }
-    return wp;
+  getElementMoveOptions(player) {
+    return this.links
+      .filter(l => l.has(player.wp));
   }
 }
