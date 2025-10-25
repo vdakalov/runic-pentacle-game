@@ -152,7 +152,7 @@ export default class GameCoreModule extends CoreModule {
     }
 
     // debug
-    links.forEach(l => console.log(l.toString()));
+    // links.forEach(l => console.log(l.toString()));
   }
 
   destroy() {

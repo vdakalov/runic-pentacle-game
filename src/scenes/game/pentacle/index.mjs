@@ -173,7 +173,7 @@ export default class PentacleScene extends SceneCoreModule {
     }
 
     // runes
-    lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.kind)}`);
+    lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.wp.id)}`);
 
     lines.push(` - ${l`Events`}: ${player.game.events.map(event => event.wp.id)}`);
 
@@ -339,9 +339,9 @@ export default class PentacleScene extends SceneCoreModule {
    */
   _initLineMoving(player, dice) {
     const links = this.game.getElementMoveOptions(player);
-    let message = l`Which way are you wish?`;
+    let message = l`Do you wish moving over pentacle lines?`;
     links.forEach((link, index) =>
-      message += `\n  ${index + 1} - ${link.lineSegmentName}`);
+      message += `\n  ${index + 1} - ${l`${link.lineSegmentName}`}`);
     const wayRaw = window.prompt(message) || '';
     const wayNumber = Number.parseInt(wayRaw.trim());
     if (Number.isInteger(wayNumber)) {
