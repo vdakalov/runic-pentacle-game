@@ -62,5 +62,10 @@ export default class Player {
      * @type {UfsEvent[]}
      */
     this.events = [];
+    /**
+     * Pentacle's lines touched by player
+     * @type {BoardWaypointSegment[]}
+     */
+    this.linesSegments = [];
   }
 }

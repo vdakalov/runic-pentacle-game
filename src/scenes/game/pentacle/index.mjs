@@ -14,7 +14,6 @@ import { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
 import MenuScene from '../../menu.mjs';
 import l from '../../../i18n.mjs';
-import Cursor from '../link-cursor.mjs';
 import LinkCursor from '../link-cursor.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
@@ -176,6 +175,8 @@ export default class PentacleScene extends SceneCoreModule {
     lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.wp.id)}`);
 
     lines.push(` - ${l`Events`}: ${player.game.events.map(event => event.wp.id)}`);
+
+    lines.push(` - ${l`Lines`}: ${player.game.linesSegments.map(line => BoardWaypointSegment[line])}`);
 
     const text = lines.join('\n');
     window.alert(text);
@@ -364,7 +365,17 @@ export default class PentacleScene extends SceneCoreModule {
     while (dice-->0) {
       player.linkCursor.next();
     }
+    if (player.linkCursor.wp.atElement) {
+      if (player.game.linesSegments.length === 5) {
+        // finish pentacle
+      }
+      const message = l`Phase has been finished!`;
+      window.alert(message);
+    }
     player.setWaypoint(player.linkCursor.wp);
+    if (player.game.linesSegments.indexOf(player.linkCursor.link.lineSegment) === -1) {
+      player.game.linesSegments.push(player.linkCursor.link.lineSegment);
+    }
   }
 
   /**
