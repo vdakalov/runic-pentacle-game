@@ -19,11 +19,41 @@ export default class Application {
      */
     this.core = new Core();
 
+    /**
+     *
+     * @type {module:url.URLSearchParams|URLSearchParams}
+     */
+    this.params = new window.URLSearchParams(
+      window.location.search || window.location.hash);
+
     init()
       .then(this._load.bind(this));
   }
 
   _load() {
+    const scenes = [
+      MenuScene,
+      PentacleScene,
+      EditorScene
+    ];
+
+    let scene = scenes[0];
+
+    if (this.params.has('scene')) {
+      const value = this.params.get('scene');
+      const index = Number.parseInt(value);
+      if (Number.isFinite(index)) {
+        scene = scenes[index] || scene;
+      } else {
+        scene = scenes.find(scene =>
+          scene.name === value) || scene;
+      }
+      console.debug(`%cApplication%c: Option scene is defined as%c ${value} (${scene.name})`,
+        'color:darkmagenta; text-decoration: underline',
+        'color:gray; text-decoration: none',
+        'font-weight: bold');
+    }
+
     this.core.load(
       // storage
       StorageCoreModule,
@@ -39,7 +69,8 @@ export default class Application {
       // Scenes
       // MenuScene,
       // PentacleScene,
-      EditorScene,
+      // EditorScene,
+      scene,
     )
       .then(() => {
         // start request animation frame system
