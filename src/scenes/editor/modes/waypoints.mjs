@@ -2,6 +2,7 @@ import { Cursor } from '../../../utils.mjs';
 import EditorMode from '../mode.mjs';
 import BoardWaypoint, { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
+import l from '../../../i18n.mjs';
 
 class EditorWaypointSelection {
   /**
@@ -91,11 +92,11 @@ export default class WayPointsMode extends EditorMode {
   contextMenuBuilder(bpe, ewp) {
     return [
       new ActiveTextItem(
-        `Def. Seg.: ${BoardWaypointSegment[this.segment]}`,
+        l`Def. Seg.: ${BoardWaypointSegment[this.segment]}`,
         this.nextSegment.bind(this, bpe, ewp), ewp !== undefined, bpe.origin),
-      new ActiveTextItem(`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`,
+      new ActiveTextItem(l`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`,
         this.nextSegment.bind(this, bpe, ewp), ewp === undefined, bpe.origin),
-      new ActiveTextItem('Delete', this.deleteWaypoint.bind(this, ewp), ewp === undefined),
+      new ActiveTextItem(l`Delete`, this.deleteWaypoint.bind(this, ewp), ewp === undefined),
     ];
   }
 

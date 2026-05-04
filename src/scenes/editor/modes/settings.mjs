@@ -1,6 +1,7 @@
 import EditorMode from '../mode.mjs';
 import { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
+import l from '../../../i18n.mjs';
 
 export default class SettingsMode extends EditorMode {
 
@@ -19,29 +20,29 @@ export default class SettingsMode extends EditorMode {
     const bwpInn = this.editor.board.startings[BoardWaypointSegment.RingInner];
     if (ewp === undefined) {
       return [
-        new ActiveTextItem(`Unset starting for ${lOut}`,
+        new ActiveTextItem(l`Unset starting for ${lOut}`,
           this.toggleStart.bind(this, undefined), bwpOut === undefined),
-        new ActiveTextItem(`Unset starting for ${lMid}`,
+        new ActiveTextItem(l`Unset starting for ${lMid}`,
           this.toggleStart.bind(this, undefined), bwpMid === undefined),
-        new ActiveTextItem(`Unset starting for ${lInn}`,
+        new ActiveTextItem(l`Unset starting for ${lInn}`,
           this.toggleStart.bind(this, undefined), bwpInn === undefined)
       ];
     }
     return [
       new ActiveTextItem(
         bwpOut === ewp.bwp
-          ? `Unset starting for ${lOut}`
-          : `Set as starting for ${lOut}`,
+          ? l`Unset starting for ${lOut}`
+          : l`Set as starting for ${lOut}`,
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingOuter)),
       new ActiveTextItem(
         bwpMid === ewp.bwp
-          ? `Unset starting for ${lMid}`
-          : `Set as starting for ${lMid}`,
+          ? l`Unset starting for ${lMid}`
+          : l`Set as starting for ${lMid}`,
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingMiddle)),
       new ActiveTextItem(
         bwpInn === ewp.bwp
-          ? `Unset starting for ${lInn}`
-          : `Set as starting for ${lInn}`,
+          ? l`Unset starting for ${lInn}`
+          : l`Set as starting for ${lInn}`,
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingInner))
     ];
   }

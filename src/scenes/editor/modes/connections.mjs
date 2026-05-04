@@ -2,6 +2,7 @@ import EditorMode from '../mode.mjs';
 import { Cursor } from '../../../utils.mjs';
 import { EditorTheme } from '../../../theme.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
+import l from '../../../i18n.mjs';
 
 export default class ConnectionsMode extends EditorMode {
   /**
@@ -62,27 +63,27 @@ export default class ConnectionsMode extends EditorMode {
    * @returns {ContextMenuItem[]}
    */
   contextMenuBuilder(bpe, ewp) {
-    if (this._connectionActive !== undefined) {
-      const ewc = this._connectionActive;
+    const ewc = this._connectionActive;
+    if (ewc !== undefined && (ewc.from === ewp || ewc.to === ewp)) {
       return [
-        new ActiveTextItem(ewc.directed ? 'Directed' : 'Non-directed',
+        new ActiveTextItem(ewc.directed ? l`Directed` : l`Non-directed`,
           this.toggleDirected.bind(this, ewc), false, bpe.origin),
-        new ActiveTextItem('Reverse', this.reverseActiveConnection.bind(this, ewc),
+        new ActiveTextItem(l`Reverse`, this.reverseActiveConnection.bind(this, ewc),
           !ewc.directed, bpe.origin),
-        new ActiveTextItem('Next', this.activateNextConnection.bind(this, ewp, ewc),
+        new ActiveTextItem(l`Next`, this.activateNextConnection.bind(this, ewp, ewc),
           ewp === undefined || 2 > ewp.connections.length, bpe.origin),
-        new ActiveTextItem('Delete', this.deleteConnection.bind(this, ewc), false, bpe.origin),
-        new ActiveTextItem('Cancel', this.deactivateConnection.bind(this), false, bpe.origin),
+        new ActiveTextItem(l`Delete`, this.deleteConnection.bind(this, ewc), false, bpe.origin),
+        new ActiveTextItem(l`Cancel`, this.deactivateConnection.bind(this), false, bpe.origin),
       ];
     }
     if (ewp === undefined) {
       return [
-        new ActiveTextItem(this._directed ? 'Def. Directed' : 'Def. Non-directed',
+        new ActiveTextItem(this._directed ? l`Def. Directed` : l`Def. Non-directed`,
           this.toggleDirected.bind(this, undefined), false, bpe.origin)
       ];
     }
     return ewp.connections.map(ewc => new ActiveTextItem(
-      `Connection ${this.editor.connections.indexOf(ewc) + 1}`,
+      l`Connection ${this.editor.connections.indexOf(ewc) + 1}`,
       this.activateConnection.bind(this, ewc), false, bpe.origin));
   }
 
