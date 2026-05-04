@@ -41,7 +41,7 @@ export default class ActiveTextItem extends TextItem {
    */
   /**
    *
-   * @param {string} text Item text
+   * @param {TextItemText} text Item text
    * @param {ContextMenuItemHandler} [handler] Inactive item if not specified
    * @param {boolean} [disabled]
    * @param {MouseEvent} [cme] Context Menu Event - Required for update menu from handler

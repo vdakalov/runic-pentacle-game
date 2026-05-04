@@ -38,8 +38,8 @@ export default class Application {
 
       // Scenes
       // MenuScene,
-      PentacleScene,
-      // EditorScene,
+      // PentacleScene,
+      EditorScene,
     )
       .then(() => {
         // start request animation frame system

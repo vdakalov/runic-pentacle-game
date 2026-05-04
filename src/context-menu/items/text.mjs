@@ -20,11 +20,35 @@ export default class TextItem extends ContextMenuItem {
 
   /**
    *
-   * @param {string} text Item text
+   * @returns {string}
+   */
+  get title() {
+    return this._element.title;
+  }
+
+  /**
+   *
+   * @param {string} value
+   */
+  set title(value) {
+    this._element.title = value;
+  }
+
+  /**
+   * @typedef {string|[text:string,title?:string]} TextItemText
+   */
+  /**
+   *
+   * @param {TextItemText} text Item text
    * @param {boolean} [disabled]
    */
   constructor(text, disabled) {
     super(disabled);
+
+    if (Array.isArray(text)) {
+      this.title = text[1];
+      text = text[0];
+    }
 
     /**
      *

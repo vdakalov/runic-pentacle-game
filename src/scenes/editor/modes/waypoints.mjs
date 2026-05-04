@@ -3,6 +3,7 @@ import EditorMode from '../mode.mjs';
 import BoardWaypoint, { BoardWaypointSegment } from '../../../core-modules/board/waypoint.mjs';
 import ActiveTextItem from '../../../context-menu/items/active-text.mjs';
 import l from '../../../i18n.mjs';
+import lt from '../../../long-text.mjs';
 
 class EditorWaypointSelection {
   /**
@@ -48,6 +49,9 @@ class EditorWaypointSelection {
 }
 
 export default class WayPointsMode extends EditorMode {
+
+  static description = 'Edit waypoints locations and segments';
+
   /**
    *
    * @param {EditorScene} editor
@@ -92,11 +96,14 @@ export default class WayPointsMode extends EditorMode {
   contextMenuBuilder(bpe, ewp) {
     return [
       new ActiveTextItem(
-        l`Def. Seg.: ${BoardWaypointSegment[this.segment]}`,
+        [l`Def. Seg.: ${BoardWaypointSegment[this.segment]}`, l(lt.CmItemEditorModeWaypointsDefSeg)],
         this.nextSegment.bind(this, bpe, ewp), ewp !== undefined, bpe.origin),
-      new ActiveTextItem(l`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`,
+      new ActiveTextItem(
+        [l`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`, l(lt.CmItemEditorModeWaypointsCurrentAndChangeSeg)],
         this.nextSegment.bind(this, bpe, ewp), ewp === undefined, bpe.origin),
-      new ActiveTextItem(l`Delete`, this.deleteWaypoint.bind(this, ewp), ewp === undefined),
+      new ActiveTextItem(
+        [l`Delete`, l`Permanently delete waypoint`],
+        this.deleteWaypoint.bind(this, ewp), ewp === undefined),
     ];
   }
 
