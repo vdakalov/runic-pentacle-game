@@ -13,12 +13,15 @@ import UfsEvent from './ufs-event.mjs';
 import { Phase } from '../player.mjs';
 import PlayerObject from './player.mjs';
 import MenuScene from '../../menu.mjs';
-import l from '../../../i18n.mjs';
 import LinkCursor from '../link-cursor.mjs';
+import l from '../../../i18n.mjs';
+import lt from '../../../long-text.mjs';
 
 export default class PentacleScene extends SceneCoreModule {
   constructor(core) {
     super(core);
+
+    this._lt = lt.Application.Scene.Pentacle;
 
     /**
      *
@@ -99,14 +102,24 @@ export default class PentacleScene extends SceneCoreModule {
       const po = this.cmm;
       items.push(
         new SeparatorItem(items.length === 0),
-        new ActiveTextItem(l`Player ${po.segmentName}`,
+        new ActiveTextItem([
+          l(this._lt.ContextMenu.Player.Text, po.segmentName),
+            l(this._lt.ContextMenu.Player.Title)],
           this._cmSelectPlayer.bind(this, undefined), false, event),
-        new ActiveTextItem(l`Turn`, this._cmPlayerTurn.bind(this, po), false, event),
-        new ActiveTextItem(l`Stats`, this._cmPlayerStats.bind(this, po)),
+        new ActiveTextItem([
+          l(this._lt.ContextMenu.Turn.Text),
+          l(this._lt.ContextMenu.Turn.Title)
+        ], this._cmPlayerTurn.bind(this, po), false, event),
+        new ActiveTextItem([
+          l(this._lt.ContextMenu.Stats.Text),
+          l(this._lt.ContextMenu.Stats.Title)
+        ], this._cmPlayerStats.bind(this, po)),
       );
     } else {
       for (const player of this.players) {
-        const item = new ActiveTextItem(l`Player ${player.segmentName}`,
+        const item = new ActiveTextItem([
+          l(this._lt.ContextMenu.Player.Text, player.segmentName),
+          l(this._lt.ContextMenu.Player.Title)],
           this._cmSelectPlayer.bind(this, player), false, event);
         items.push(item);
       }
@@ -114,8 +127,14 @@ export default class PentacleScene extends SceneCoreModule {
 
     items.push(
       new SeparatorItem(items.length === 0),
-      new ActiveTextItem(l`Reset`, this._cmReset.bind(this)),
-      new ActiveTextItem(l`Menu`, this.changeScene.bind(this, MenuScene))
+      new ActiveTextItem([
+        l(this._lt.ContextMenu.Reset.Text),
+        l(this._lt.ContextMenu.Reset.Title)
+      ], this._cmReset.bind(this)),
+      new ActiveTextItem([
+        l(lt.Application.ContextMenu.Menu.Text),
+        l(lt.Application.ContextMenu.Menu.Title)
+      ], this.changeScene.bind(this, MenuScene))
     );
 
     return items;
@@ -153,12 +172,12 @@ export default class PentacleScene extends SceneCoreModule {
    */
   _cmPlayerStats(player) {
     const lines = [
-      l`Player`,
-      ' - ' + l`Segment: ${player.segmentName}`,
+      l(this._lt.Player),
+      ' - ' + l(this._lt.Segment, player.segmentName),
     ];
 
     // stones
-    lines.push(` - ${l`Stones`}:`);
+    lines.push(' - ' + l(this._lt.Stones));
     const stones = player.game.stones
       .reduce((acc, stone) => {
         if (!acc.hasOwnProperty(stone.kindName)) {
@@ -168,15 +187,15 @@ export default class PentacleScene extends SceneCoreModule {
         return acc;
       }, {});
     for (const [kindName, count] of Object.entries(stones)) {
-      lines.push(`    - ${l`${kindName}`}: ${count}`);
+      lines.push(`    - ${l(kindName)}: ${count}`);
     }
 
     // runes
-    lines.push(` - ${l`Runes`}: ${player.game.runes.map(rune => rune.wp.id)}`);
+    lines.push(` - ${l(this._lt.Runes)}: ${player.game.runes.map(rune => rune.wp.id)}`);
 
-    lines.push(` - ${l`Events`}: ${player.game.events.map(event => event.wp.id)}`);
+    lines.push(` - ${l(this._lt.Events)}: ${player.game.events.map(event => event.wp.id)}`);
 
-    lines.push(` - ${l`Lines`}: ${player.game.linesSegments.map(line => BoardWaypointSegment[line])}`);
+    lines.push(` - ${l(this._lt.Lines)}: ${player.game.linesSegments.map(line => BoardWaypointSegment[line])}`);
 
     const text = lines.join('\n');
     window.alert(text);
@@ -281,7 +300,7 @@ export default class PentacleScene extends SceneCoreModule {
    * @returns {number}
    */
   _promptDice() {
-    const msg = l`Dice value` + ' [1-6] (' + l`cancel to random` + '):';
+    const msg = l(this._lt.Dice.Value) + ' [1-6] (' + l(this._lt.Dice.Cancel) + '):';
     const raw = this._lastDicePromptValue = window
       .prompt(msg, this._lastDicePromptValue) || '';
     const int = Number.parseInt(raw.trim());
@@ -289,7 +308,7 @@ export default class PentacleScene extends SceneCoreModule {
       return int;
     }
     const value = this.game.dice();
-    window.alert(l`Dice value: ${value}`);
+    window.alert(l(this._lt.Dice.Result, value.toString()));
     return value;
   }
 
@@ -340,9 +359,9 @@ export default class PentacleScene extends SceneCoreModule {
    */
   _initLineMoving(player, dice) {
     const links = this.game.getElementMoveOptions(player);
-    let message = l`Do you wish moving over pentacle lines?`;
+    let message = l(this._lt.EndPhaseQuestion);
     links.forEach((link, index) =>
-      message += `\n  ${index + 1} - ${l`${link.lineSegmentName}`}`);
+      message += `\n  ${index + 1} - ${l(link.lineSegmentName)}`);
     const wayRaw = window.prompt(message) || '';
     const wayNumber = Number.parseInt(wayRaw.trim());
     if (Number.isInteger(wayNumber)) {
@@ -369,7 +388,7 @@ export default class PentacleScene extends SceneCoreModule {
       if (player.game.linesSegments.length === 5) {
         // finish pentacle
       }
-      const message = l`Phase has been finished!`;
+      const message = l(this._lt.EndSceneAlert);
       window.alert(message);
     }
     player.setWaypoint(player.linkCursor.wp);

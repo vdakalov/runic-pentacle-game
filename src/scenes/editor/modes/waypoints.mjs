@@ -50,7 +50,7 @@ class EditorWaypointSelection {
 
 export default class WayPointsMode extends EditorMode {
 
-  static description = 'Edit waypoints locations and segments';
+  static description = lt.Application.Scene.Editor.Description;
 
   /**
    *
@@ -58,6 +58,7 @@ export default class WayPointsMode extends EditorMode {
    */
   constructor(editor) {
     super(editor);
+    this._lt = lt.Application.Scene.Editor.Mode.Waypoints;
     /**
      *
      * @type {string}
@@ -95,14 +96,19 @@ export default class WayPointsMode extends EditorMode {
    */
   contextMenuBuilder(bpe, ewp) {
     return [
-      new ActiveTextItem(
-        [l`Def. Seg.: ${BoardWaypointSegment[this.segment]}`, l(lt.CmItemEditorModeWaypointsDefSeg)],
+      new ActiveTextItem([
+        l(this._lt.ShowSetDefaultSegment.ContextMenu.Text,
+          BoardWaypointSegment[this.segment]),
+          l(this._lt.ShowSetDefaultSegment.ContextMenu.Title)],
         this.nextSegment.bind(this, bpe, ewp), ewp !== undefined, bpe.origin),
-      new ActiveTextItem(
-        [l`Wp Seg.: ${ewp && BoardWaypointSegment[ewp.segment]}`, l(lt.CmItemEditorModeWaypointsCurrentAndChangeSeg)],
+      new ActiveTextItem([
+        l(this._lt.ShowSetWaypointSegment.ContextMenu.Text,
+          ewp && BoardWaypointSegment[ewp.segment]),
+          l(this._lt.ShowSetWaypointSegment.ContextMenu.Title)],
         this.nextSegment.bind(this, bpe, ewp), ewp === undefined, bpe.origin),
-      new ActiveTextItem(
-        [l`Delete`, l`Permanently delete waypoint`],
+      new ActiveTextItem([
+        l(this._lt.DeleteWaypoint.ContextMenu.Text),
+          l(this._lt.DeleteWaypoint.ContextMenu.Title)],
         this.deleteWaypoint.bind(this, ewp), ewp === undefined),
     ];
   }
@@ -253,7 +259,7 @@ export default class WayPointsMode extends EditorMode {
    * @param {EditorWaypoint} ewp
    */
   deleteWaypoint(ewp) {
-    if (!window.confirm('Are you sure?')) {
+    if (!window.confirm(l(this._lt.DeleteWaypoint.Confirm))) {
       return;
     }
     this.editor.deleteWaypoint(ewp);

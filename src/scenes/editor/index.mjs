@@ -24,6 +24,8 @@ export default class EditorScene extends SceneCoreModule {
   constructor(core) {
     super(core);
 
+    this._lt = lt.Application.Scene.Editor;
+
     /**
      *
      * @type {EditorWaypoint[]}
@@ -154,7 +156,10 @@ export default class EditorScene extends SceneCoreModule {
 
     items.push(
       new SeparatorItem(items.length === 0),
-      new ActiveTextItem([l`Mode: ${this._mode.constructor.name}`, l(lt.CmItemEditorMode)], () => {
+      new ActiveTextItem([
+        l(this._lt.ContextMenu.Mode.Text, this._mode.constructor.name),
+        l(this._lt.ContextMenu.Mode.Title)],
+        () => {
         this._modeSelection = !this._modeSelection;
         return true;
       }, false, event),
@@ -167,7 +172,9 @@ export default class EditorScene extends SceneCoreModule {
       new SeparatorItem(!this._modeSelection)
     );
 
-    items.push(new ActiveTextItem([l`Menu`, l(lt.CmItemMenu)],
+    items.push(new ActiveTextItem([
+      l(lt.Application.ContextMenu.Menu.Text),
+        l(lt.Application.ContextMenu.Menu.Title)],
       this.changeScene.bind(this, MenuScene)));
     return items;
   }

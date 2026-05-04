@@ -4,10 +4,13 @@ import PentacleScene from './game/pentacle/index.mjs';
 import EditorScene from './editor/index.mjs';
 import { Assets } from '../theme.mjs';
 import l from '../i18n.mjs';
+import lt from '../long-text.mjs';
 
 export default class MenuScene extends SceneCoreModule {
   constructor(core) {
     super(core);
+
+    this._lt = lt.Application.Scene.Menu;
 
     /**
      *
@@ -22,7 +25,7 @@ export default class MenuScene extends SceneCoreModule {
      * @type {ButtonSceneObject}
      * @readonly
      */
-    this.btnGame = new ButtonSceneObject(0, 0, l`Play`,
+    this.btnGame = new ButtonSceneObject(0, 0, l(this._lt.Play.Text),
       this.changeScene.bind(this, PentacleScene));
     this.objects.push(this.btnGame);
 
@@ -31,7 +34,7 @@ export default class MenuScene extends SceneCoreModule {
      * @type {ButtonSceneObject}
      * @readonly
      */
-    this.btnEditor = new ButtonSceneObject(0, 0, l`Editor`,
+    this.btnEditor = new ButtonSceneObject(0, 0, l(this._lt.Editor.Text),
       this.changeScene.bind(this, EditorScene));
     this.objects.push(this.btnEditor);
   }

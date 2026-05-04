@@ -7,7 +7,7 @@ import lt from '../../../long-text.mjs';
 
 export default class ConnectionsMode extends EditorMode {
 
-  static description = 'Define waypoints connections';
+  static description = lt.Application.Scene.Editor.Mode.Connections.Description;
 
   /**
    *
@@ -15,6 +15,7 @@ export default class ConnectionsMode extends EditorMode {
    */
   constructor(editor) {
     super(editor);
+    this._lt = lt.Application.Scene.Editor.Mode.Connections;
     /**
      *
      * @type {[EditorWaypoint, BoardPointerEvent]|undefined}
@@ -70,33 +71,45 @@ export default class ConnectionsMode extends EditorMode {
     const ewc = this._connectionActive;
     if (ewc !== undefined && (ewc.from === ewp || ewc.to === ewp)) {
       return [
-        new ActiveTextItem(
-          [ewc.directed ? l`Directed` : l`Non-directed`, l(lt.CmItemEditorModeConnectionsDefDir)],
+        new ActiveTextItem(ewc.directed
+          ? [l(this._lt.Selection.Directed.Directed.Text),
+            l(this._lt.Selection.Directed.Directed.Title)]
+          : [l(this._lt.Selection.Directed.NonDirected.Text),
+            l(this._lt.Selection.Directed.NonDirected.Title)],
           this.toggleDirected.bind(this, ewc), false, bpe.origin),
-        new ActiveTextItem(
-          [l`Reverse`, l(lt.CmItemEditorModeConnectionsReverse)],
+        new ActiveTextItem([
+          l(this._lt.Selection.Directed.Reverse.Text),
+            l(this._lt.Selection.Directed.Reverse.Title)],
           this.reverseActiveConnection.bind(this, ewc), !ewc.directed, bpe.origin),
-        new ActiveTextItem(
-          [l`Next`, l(lt.CmItemEditorModeConnectionsNext)],
+        new ActiveTextItem([
+          l(this._lt.Selection.Next.Text),
+            l(this._lt.Selection.Next.Title)],
           this.activateNextConnection.bind(this, ewp, ewc),
           ewp === undefined || 2 > ewp.connections.length, bpe.origin),
-        new ActiveTextItem(
-          [l`Delete`, l(lt.CmItemEditorModeConnectionsDelete)],
+        new ActiveTextItem([
+          l(this._lt.Selection.Delete.Text),
+            l(this._lt.Selection.Delete.Title)],
           this.deleteConnection.bind(this, ewc), false, bpe.origin),
-        new ActiveTextItem(
-          [l`Cancel`, l('Cancel connection selection')],
+        new ActiveTextItem([
+          l(this._lt.Selection.Cancel.Text),
+            l(this._lt.Selection.Cancel.Title)],
           this.deactivateConnection.bind(this), false, bpe.origin),
       ];
     }
     if (ewp === undefined) {
       return [
         new ActiveTextItem(
-          [this._directed ? l`Def. Directed` : l`Def. Non-directed`, l(lt.CmItemEditorModeConnectionsDefConnectionType)],
+          this._directed
+            ? [l(this._lt.Default.Directed.Text),
+              l(this._lt.Default.Directed.Title)]
+            : [l(this._lt.Default.NonDirected.Text),
+              l(this._lt.Default.NonDirected.Title)],
           this.toggleDirected.bind(this, undefined), false, bpe.origin)
       ];
     }
     return ewp.connections.map(ewc => new ActiveTextItem(
-      l`Connection ${this.editor.connections.indexOf(ewc) + 1}`,
+      [l(this._lt.Connection.Text, (this.editor.connections.indexOf(ewc) + 1).toString()),
+      l(this._lt.Connection.Title)],
       this.activateConnection.bind(this, ewc), false, bpe.origin));
   }
 

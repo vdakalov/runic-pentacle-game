@@ -6,7 +6,16 @@ import lt from '../../../long-text.mjs';
 
 export default class SettingsMode extends EditorMode {
 
-  static description = 'Common settings';
+  static description = lt.Application.Scene.Editor.Mode.Settings.Description;
+
+  /**
+   *
+   * @param {EditorScene} editor
+   */
+  constructor(editor) {
+    super(editor);
+    this._lt = lt.Application.Scene.Editor.Mode.Settings;
+  }
 
   /**
    *
@@ -23,35 +32,35 @@ export default class SettingsMode extends EditorMode {
     const bwpInn = this.editor.board.startings[BoardWaypointSegment.RingInner];
     if (ewp === undefined) {
       return [
-        new ActiveTextItem([l`Unset starting for ${lOut}`, l(lt.CmItemEditorModeSettingsUnsetStart)],
+        new ActiveTextItem([
+          l(this._lt.UnsetStarting.Text, lOut),
+            l(this._lt.UnsetStarting.Title)],
           this.toggleStart.bind(this, undefined), bwpOut === undefined),
-        new ActiveTextItem([l`Unset starting for ${lMid}`, l(lt.CmItemEditorModeSettingsUnsetStart)],
+        new ActiveTextItem([
+          l(this._lt.UnsetStarting.Text, lMid),
+            l(this._lt.UnsetStarting.Title)],
           this.toggleStart.bind(this, undefined), bwpMid === undefined),
-        new ActiveTextItem([l`Unset starting for ${lInn}`, l(lt.CmItemEditorModeSettingsUnsetStart)],
+        new ActiveTextItem([
+          l(this._lt.UnsetStarting.Text, lInn),
+            l(this._lt.UnsetStarting.Title)],
           this.toggleStart.bind(this, undefined), bwpInn === undefined)
       ];
     }
     return [
       new ActiveTextItem(
-        [bwpOut === ewp.bwp
-          ? l`Unset starting for ${lOut}`
-          : l`Set as starting for ${lOut}`,
-          l(lt.CmItemEditorModeSettingsToggleStart)
-        ],
+        bwpOut === ewp.bwp
+          ? [l(this._lt.UnsetStarting.Text, lOut), l(this._lt.UnsetStarting.Title)]
+          : [l(this._lt.SetStarting.Text, lOut), l(this._lt.SetStarting.Title)],
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingOuter)),
       new ActiveTextItem(
-        [bwpMid === ewp.bwp
-          ? l`Unset starting for ${lMid}`
-          : l`Set as starting for ${lMid}`,
-          l(lt.CmItemEditorModeSettingsToggleStart)
-        ],
+        bwpMid === ewp.bwp
+          ? [l(this._lt.UnsetStarting.Text, lMid), l(this._lt.UnsetStarting.Title)]
+          : [l(this._lt.SetStarting.Text, lMid), l(this._lt.SetStarting.Title)],
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingMiddle)),
       new ActiveTextItem(
-        [bwpInn === ewp.bwp
-          ? l`Unset starting for ${lInn}`
-          : l`Set as starting for ${lInn}`,
-          l(lt.CmItemEditorModeSettingsToggleStart)
-        ],
+        bwpInn === ewp.bwp
+          ? [l(this._lt.UnsetStarting.Text, lInn), l(this._lt.UnsetStarting.Title)]
+          : [l(this._lt.SetStarting.Text, lInn), l(this._lt.SetStarting.Title)],
         this.toggleStart.bind(this, ewp, BoardWaypointSegment.RingInner))
     ];
   }
