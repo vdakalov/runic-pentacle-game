@@ -1,10 +1,8 @@
 import CoreModule from '../../core-module.mjs';
 import BoardCoreModule from '../../core-modules/board/index.mjs';
 import { BoardWaypointSegment } from '../../core-modules/board/waypoint.mjs';
-import Player, { Phase } from './player.mjs';
+import Player from './player.mjs';
 import Link from './link.mjs';
-import l from '../../i18n.mjs';
-import LinkCursor from './link-cursor.mjs';
 
 export default class GameCoreModule extends CoreModule {
   constructor(core) {
@@ -50,11 +48,6 @@ export default class GameCoreModule extends CoreModule {
      * @type {BoardWaypointSegment}
      */
     let segment = undefined;
-    /**
-     *
-     * @type {Link|undefined}
-     */
-    let link = undefined;
     /**
      *
      * @type {Link[]}

@@ -13,6 +13,11 @@ export const Phase = createEnum({
    * Player moves on pentacle lines
    */
   LinesMoving: 2,
+  /**
+   * Player successfully exit from pentacle and
+   * runs intention
+   */
+  Intention: 3,
 });
 
 export default class Player {
